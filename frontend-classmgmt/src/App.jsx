@@ -4,9 +4,12 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
+import Logout from "./components/Logout";
+import {useAuth} from "./context/AuthContext";
 import "./App.css";
 
 function App() {
+  const {currentUser} = useAuth(); // getting the state via context API
   return (
     <Router>
       <header className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md">
@@ -16,20 +19,41 @@ function App() {
               ClassRoom Management
             </Link>
           </h1>
+          
           <nav className="hidden md:flex space-x-4">
-            <Link
-              to="/login"
-              className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
-            >
-              Register
-            </Link>
-          </nav>
+      {!currentUser ? (
+        <>
+          <Link
+            to="/login"
+            className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+          >
+            Login
+          </Link>
+          <Link
+            to="/register"
+            className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+          >
+            Register
+          </Link>
+        </>
+      ) : (
+        <>
+          <Link
+            to="/dashboard"
+            className="px-4 py-2 bg-white text-green-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/logout"
+            className="px-4 py-2 bg-white text-red-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+          >
+            Logout
+          </Link>
+        </>
+      )}
+    </nav>
+
           <button
             className="md:hidden text-white focus:outline-none"
             aria-label="Toggle Menu"
@@ -56,6 +80,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<div>Welcome to the Homepage</div>} />
+          <Route path="/logout" element={<Logout />} />
           <Route path='/dashboard' element={<PrivateRoute>
               <Dashboard />
             </PrivateRoute>} />
