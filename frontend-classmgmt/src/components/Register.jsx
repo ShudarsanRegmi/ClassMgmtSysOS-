@@ -15,8 +15,11 @@ const Register = () => {
     setError("");
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User Registered:", userCredential.user);
-      navigate("/");
+      const user = userCredential.user;
+      console.log("User Registered:", user);
+
+      // Redirect to profile form to fill in extra details
+      navigate("/profile-form", { state: { uid: user.uid, email: user.email } });
     } catch (error) {
       console.error("Registration Error:", error.message);
       setError(error.message);
@@ -28,8 +31,9 @@ const Register = () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      console.log("Google Login Success:", result.user);
-      navigate("/");
+      const user = result.user;
+      console.log("Google Login Success:", user);
+      navigate("/profile-form", { state: { uid: user.uid, email: user.email } });
     } catch (error) {
       console.error("Google Login Error:", error.message);
       setError(error.message);
@@ -41,8 +45,9 @@ const Register = () => {
     const provider = new GithubAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      console.log("GitHub Login Success:", result.user);
-      navigate("/");
+      const user = result.user;
+      console.log("GitHub Login Success:", user);
+      navigate("/profile-form", { state: { uid: user.uid, email: user.email } });
     } catch (error) {
       console.error("GitHub Login Error:", error.message);
       setError(error.message);
@@ -53,11 +58,7 @@ const Register = () => {
     <div className="max-w-md mx-auto mt-10 p-8 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">Register</h2>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 p-3 mb-6 rounded-md text-sm">
-          {error}
-        </div>
-      )}
+      {error && <div className="bg-red-100 text-red-700 p-3 mb-6 rounded-md text-sm">{error}</div>}
 
       <form onSubmit={handleRegister} className="flex flex-col space-y-4">
         <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -100,17 +101,11 @@ const Register = () => {
       </div>
 
       <div className="flex flex-col space-y-4">
-        <button
-          onClick={handleGoogleLogin}
-          className="flex items-center justify-center bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition"
-        >
+        <button onClick={handleGoogleLogin} className="flex items-center justify-center bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition">
           <FaGoogle className="mr-2" /> Continue with Google
         </button>
 
-        <button
-          onClick={handleGithubLogin}
-          className="flex items-center justify-center bg-gray-800 text-white py-2 rounded-md hover:bg-gray-900 transition"
-        >
+        <button onClick={handleGithubLogin} className="flex items-center justify-center bg-gray-800 text-white py-2 rounded-md hover:bg-gray-900 transition">
           <FaGithub className="mr-2" /> Continue with GitHub
         </button>
       </div>

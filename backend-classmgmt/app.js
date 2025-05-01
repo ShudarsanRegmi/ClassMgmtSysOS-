@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('./firebaseAdmin');
-
+const userRouter = require('./routes/userRoutes')
 const connectDB = require('./config/db');
 
 const cors = require('cors');
@@ -17,6 +17,13 @@ const verifyToken = require('./middleware/authmiddleware'); // Todo: To confirm 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+
+app.use('/api', userRouter); 
+
+// Set up the default route or any other necessary routes
+app.get("/", (req, res) => {
+    res.send("Welcome to the API!");
+  });
 
 
 app.listen(3001, () => {

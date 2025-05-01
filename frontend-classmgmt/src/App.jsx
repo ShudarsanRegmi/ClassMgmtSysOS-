@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import ProfileForm from "./components/ProfileForm";
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
 import Logout from "./components/Logout";
@@ -79,6 +80,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile-form" element={<ProfileForm />} />
           <Route path="/" element={<div>Welcome to the Homepage</div>} />
           <Route path="/logout" element={<Logout />} />
           <Route path='/dashboard' element={<PrivateRoute>

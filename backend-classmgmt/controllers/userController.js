@@ -1,39 +1,74 @@
 const User = require('../models/User');
 
-// Register or update user on first login
+const check = async(req, res) => {
+    return res.status(200).json({message: 'Hello from the check route'});
+}
 
-const {name, email, picture, uid} = req.user;
+// const completeProfile = async (req, res) => {
+//     console.log("completing profile....");
+//     try {
+//       const uid = req.user.uid;
+//       const { name, role, phone, className } = req.body;
+  
+//       const user = await User.findOneAndUpdate(
+//         { uid },
+//         { name, role, phone, className },
+//         { new: true, upsert: true } // create if doesn't exist
+//       );
+  
+//       res.status(200).json({ message: "Profile completed", user });
+//     } catch (err) {
+//       console.error("Profile completion error:", err);
+//       res.status(500).json({ error: "Failed to complete profile" });
+//     }
+//   };
 
-
-try {
-    const existingUser = await User.findOne({firebaseUid: uid});
-
-    if(existingUser) {
-        // update user info if needed
-        existingUser.name = name || existingUser.name;
-        existingUser.email = email || existingUser.email;
-        existingUser.photoURL = picture || existingUser.photoURL;
-
-
-        await existingUser.save();
-        return res.status(200).json(existingUser);
+const completeProfile = async (req, res) => {
+    console.log("Completing profile...");
+  
+    try {
+      const uid = req.user?.uid;  // Ensure req.user exists and has uid
+  
+      // Log uid to make sure it's valid
+      console.log("User UID:", uid);
+  
+      if (!uid) {
+        console.error("Error: UID not found in user object.");
+        return res.status(400).json({ error: "User UID is missing or invalid." });
+      }
+  
+      const { name, role, phone, className } = req.body;
+  
+      // Log the data being received in the request body
+      console.log("Received body data:", { name, role, phone, className });
+  
+      // Validate that required fields are provided
+      if (!name || !role) {
+        console.error("Error: Missing required fields - name or role.");
+        return res.status(400).json({ error: "Name and role are required fields." });
+      }
+  
+      // Perform the database operation with findOneAndUpdate
+      const user = await User.findOneAndUpdate(
+        { uid },
+        { name, role, phone, className },
+        { new: true, upsert: true } // create if doesn't exist
+      );
+  
+      if (!user) {
+        console.log("No user found, new user created.");
+      } else {
+        console.log("User found and updated:", user);
+      }
+  
+      // Return success response
+      res.status(200).json({ message: "Profile completed", user });
+    } catch (err) {
+      console.error("Profile completion error:", err);
+      res.status(500).json({ error: "Failed to complete profile", details: err.message });
     }
-
-    // Create new user
-    const newUser = new User({
-        name,
-        email,
-        photoURL: picture, 
-        firebaseUid: uid,
-        role: 'student' // defualt role
-    });
-
-    
-    await newUser.save();
-    res.status(201).json(newUser);
-} catch(err) {
-    res.status(500).json({message: 'Error registering user', error: err.message});
-};
+  };
+  
 
 
 // Get current user profile
@@ -53,8 +88,7 @@ const getCurrentUserProfile = async(req, res) => {
 };
 
 
-// Update role of a user (admin-only)
-
+// Only admin or superadmin can update user roles
 const updateUserRole = async(req, res) => {
     const {targetUid, newRole} = req.body;
 
@@ -100,10 +134,11 @@ const getAllUsers = async(req, res) => {
 };
 
 module.exports = {
-    registerOrUpdateUser, 
-    getUserProfile, 
+    completeProfile,
+    getCurrentUserProfile, 
     updateUserRole, 
-    getAllUsers
+    getAllUsers,
+    check
 };
 
 
