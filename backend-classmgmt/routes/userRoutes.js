@@ -5,10 +5,10 @@ const router = express.Router();
 
 const {
     completeProfile,
-    getCurrentUserProfile, 
     updateUserRole, 
     getAllUsers,
-    check
+    check,
+    getUserProfile
 } = require('../controllers/userController');
 
 
@@ -19,6 +19,7 @@ const verifyToken = require('../middleware/authmiddleware'); // Todo: To confirm
 
 router.get('/check', verifyToken, check);
 router.post("/complete-profile", verifyToken, completeProfile);
+router.get('/profile', verifyToken, getUserProfile);
 
 
 module.exports = router;
