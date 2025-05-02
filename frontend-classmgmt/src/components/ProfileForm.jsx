@@ -2,13 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
+import { useAuth } from '../context/AuthContext';
 
 const ProfileForm = () => {
+  const {currentUser} = useAuth(); // getting the state via context API
+  console.log(currentUser)
+  const [email, setEmail] = useState(currentUser?.email || "");
   const [name, setName] = useState("");
   const [role, setRole] = useState("student");
   const [phone, setPhone] = useState("");
-  const [className, setClassName] = useState("");
+  const [classId, setclassId] = useState("");
   const [error, setError] = useState("");
+
+  
 
   const navigate = useNavigate();
 
@@ -28,7 +34,7 @@ const ProfileForm = () => {
 
       await axios.post(
         "http://localhost:3001/api/complete-profile",
-        { name, role, phone, className },
+        { name, email, role, phone, classId, email },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -60,6 +66,14 @@ const ProfileForm = () => {
           required
         />
 
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border border-gray-300 rounded-md p-3 bg-gray-100 cursor-not-allowed"
+          value={email}
+          disabled
+        />
+
         <select
           className="w-full border border-gray-300 rounded-md p-3"
           value={role}
@@ -80,10 +94,10 @@ const ProfileForm = () => {
 
         <input
           type="text"
-          placeholder="Class Name"
+          placeholder="Class Id"
           className="w-full border border-gray-300 rounded-md p-3"
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
+          value={classId}
+          onChange={(e) => setclassId(e.target.value)}
           required
         />
 

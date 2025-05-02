@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
     enum: ['student', 'CR', 'CA', 'admin', 'superadmin'],
     default: 'student',
   },
-  classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' }
+  // classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
+  classId: {type: String, required: false},
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

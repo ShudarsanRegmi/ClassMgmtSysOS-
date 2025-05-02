@@ -37,10 +37,10 @@ const completeProfile = async (req, res) => {
         return res.status(400).json({ error: "User UID is missing or invalid." });
       }
   
-      const { name, role, phone, className } = req.body;
+      const { name, email, role, phone, classId } = req.body;
   
       // Log the data being received in the request body
-      console.log("Received body data:", { name, role, phone, className });
+      console.log("Received body data:", { name, email, role, phone, classId });
   
       // Validate that required fields are provided
       if (!name || !role) {
@@ -51,7 +51,7 @@ const completeProfile = async (req, res) => {
       // Perform the database operation with findOneAndUpdate
       const user = await User.findOneAndUpdate(
         { uid },
-        { name, role, phone, className },
+        { name, email, role, phone, classId },
         { new: true, upsert: true } // create if doesn't exist
       );
   
