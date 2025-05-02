@@ -5,6 +5,7 @@ import Register from "./components/Register";
 import ProfileForm from "./components/ProfileForm";
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
+import Profile from './components/Profile';
 import Logout from "./components/Logout";
 import {useAuth} from "./context/AuthContext";
 import "./App.css";
@@ -85,7 +86,10 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path='/dashboard' element={<PrivateRoute>
               <Dashboard />
-            </PrivateRoute>} />
+          </PrivateRoute>} />
+          <Route path='/profile' element={<PrivateRoute>
+              <Profile />
+          </PrivateRoute>} />
         </Routes>
       </main>
     </Router>

@@ -71,20 +71,23 @@ const completeProfile = async (req, res) => {
   
 
 
-// Get current user profile
-const getCurrentUserProfile = async(req, res) => {
-    const {uid} = req.user;
 
-    try {
-        const user = await User.findOne({firebaseUid: uid});
-        if(!user) {
-            return res.status(404).json({message: 'User not found'});
-        }
+const getUserProfile = async (req, res) => {
+  try {
+    const uid = req.user.uid; // From Firebase token middleware
 
-        res.json(user);
-    }catch(err) {
-        res.status(500).json({message: 'Error fetching profile', error: err.message});
+    console.log("user id ",  uid);
+
+    const user = await User.findOne({ uid }).populate('classId', 'name');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Error fetching user profile:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 
@@ -135,7 +138,7 @@ const getAllUsers = async(req, res) => {
 
 module.exports = {
     completeProfile,
-    getCurrentUserProfile, 
+    getUserProfile, 
     updateUserRole, 
     getAllUsers,
     check
