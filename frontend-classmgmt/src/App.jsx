@@ -40,6 +40,14 @@ function App() {
         </>
       ) : (
         <>
+
+        <Link
+          to="/profile"
+          className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+        >
+          Profile
+        </Link>
+        
           <Link
             to="/dashboard"
             className="px-4 py-2 bg-white text-green-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"

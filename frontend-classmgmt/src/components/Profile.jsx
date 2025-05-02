@@ -3,7 +3,10 @@ import axios from 'axios';
 import { auth } from '../firebase'; // make sure this points to your firebase config
 import { getIdToken } from 'firebase/auth';
 
+
 const Profile = () => {
+
+ 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
