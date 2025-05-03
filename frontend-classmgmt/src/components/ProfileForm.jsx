@@ -34,7 +34,7 @@ const ProfileForm = () => {
 
       await axios.post(
         "http://localhost:3001/api/complete-profile",
-        { name, email, role, phone, classId, email },
+        { name, email, role, phone, classId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -81,6 +81,8 @@ const ProfileForm = () => {
         >
           <option value="student">Student</option>
           <option value="teacher">Teacher</option>
+          <option value="CR">Class Representative (CR)</option>
+          <option value="CA">Class Advisor (CA)</option>
         </select>
 
         <input
