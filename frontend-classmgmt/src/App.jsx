@@ -7,6 +7,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
 import Logout from "./components/Logout";
+import Fileupload from "./components/Fileupload";
 import {useAuth} from "./context/AuthContext";
 import "./App.css";
 
@@ -87,6 +88,7 @@ function App() {
       </header>
       <main className="container mx-auto mt-8 p-4">
         <Routes>
+
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile-form" element={<ProfileForm />} />
@@ -98,6 +100,9 @@ function App() {
           <Route path='/profile' element={<PrivateRoute>
               <Profile />
           </PrivateRoute>} />
+          <Route path="/fileupload" element={<PrivateRoute>
+              <Fileupload />
+          </PrivateRoute>} /> 
         </Routes>
       </main>
     </Router>
