@@ -32,12 +32,12 @@ function FileUploader() {
         }
       });
 
-      setUploadStatus('✅ File uploaded successfully!');
+      setUploadStatus('File uploaded successfully!');
       console.log('Uploaded File:', res.data);
       setFile(null); // Reset file input
     } catch (err) {
       console.error('Upload error:', err);
-      setUploadStatus('❌ Upload failed. Please try again.');
+      setUploadStatus('Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -45,7 +45,7 @@ function FileUploader() {
 
   return (
     <div className="p-6 bg-white shadow-md rounded-xl max-w-md mx-auto mt-8">
-      <h2 className="text-xl font-semibold mb-4 text-center">📁 Upload Your File</h2>
+      <h2 className="text-xl font-semibold mb-4 text-center">Upload Your File</h2>
 
       <input
         type="file"
