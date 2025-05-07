@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const admin = require('./firebaseAdmin');
 const userRouter = require('./routes/userRoutes')
 const fileRoutes = require('./routes/fileRoutes');
+const crRoutes = require('./routes/crRoutes');
 const connectDB = require('./config/db');
 
 const cors = require('cors');
@@ -21,6 +22,7 @@ app.use(cors());
 
 app.use('/api', userRouter); 
 app.use('/api/files/', fileRoutes);
+app.use('/api/cr', crRoutes);
 
 
 // Set up the default route or any other necessary routes
