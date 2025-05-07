@@ -3,3 +3,4 @@ secret.txt
 serviceAccountKey.json
 .env
 backend-classmgmt/.env
+./uploads
