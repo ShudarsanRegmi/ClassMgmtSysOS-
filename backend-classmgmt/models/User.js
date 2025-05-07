@@ -8,11 +8,13 @@ const userSchema = new mongoose.Schema({
   profilePhoto: String,
   role: {
     type: String,
-    enum: ['student', 'CR', 'CA', 'admin', 'superadmin'],
+    enum: ['Student', 'CR', 'CA', 'Admin', 'SuperAdmin', 'Teacher'],
     default: 'student',
   },
   // classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
   classId: {type: String, required: false},
+  semester: { type: mongoose.Schema.Types.ObjectId, ref: 'Semester' }, // Only for Students
+  courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],  // Only for Teachers
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
