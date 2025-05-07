@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
 import Logout from "./components/Logout";
 import Fileupload from "./components/Fileupload";
+import CRDashboard from "./pages/CR/CRDashboard";
 import {useAuth} from "./context/AuthContext";
 import "./App.css";
 
@@ -103,6 +104,9 @@ function App() {
           <Route path="/fileupload" element={<PrivateRoute>
               <Fileupload />
           </PrivateRoute>} /> 
+          <Route path="/cr/dashboard" element={<PrivateRoute>
+            <CRDashboard />
+          </PrivateRoute>} />
         </Routes>
       </main>
     </Router>
