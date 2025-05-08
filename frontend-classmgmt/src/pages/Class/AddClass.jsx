@@ -5,6 +5,7 @@ import axios from 'axios';
 const AddClass = () => {
   const [formData, setFormData] = useState({
     name: '',
+    classId: '',
     year: '',
     department: '',
     section: '',
@@ -17,12 +18,11 @@ const AddClass = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/classes', formData);
+      const response = await axios.post('http://localhost:3001/api/classes', formData);
       alert('Class created successfully!');
-      setFormData({ name: '', year: '', department: '', section: '' });
+      setFormData({ name: '', classId: '', year: '', department: '', section: '' });
     } catch (error) {
       console.error('Error creating class:', error);
-      alert('Failed to create class.');
     }
   };
 
@@ -34,6 +34,15 @@ const AddClass = () => {
         name="name"
         placeholder="Class Name"
         value={formData.name}
+        onChange={handleChange}
+        className="w-full mb-2 p-2 border border-gray-300 rounded"
+        required
+      />
+      <input
+        type="text"
+        name="classId"
+        placeholder="Class Id"
+        value={formData.classId}
         onChange={handleChange}
         className="w-full mb-2 p-2 border border-gray-300 rounded"
         required
@@ -71,6 +80,8 @@ const AddClass = () => {
       >
         Create Class
       </button>
+
+      
     </form>
   );
 };
