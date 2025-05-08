@@ -1,8 +1,8 @@
 // routes/semesterRoutes.js
 const express = require('express');
 const router = express.Router();
-const semesterController = require('../controllers/semesterController');
+const { createSemester } = require('../controllers/semesterController');
 
-router.post('/semesters', semesterController.createSemester);
+router.post('/semesters', createSemester);
 
 module.exports = router;
