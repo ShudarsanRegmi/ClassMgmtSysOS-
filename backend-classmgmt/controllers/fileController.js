@@ -1,8 +1,6 @@
 // controllers/file.controller.js
 const cloudinary = require('../utils/cloudinary'); // your Cloudinary config module
 const File = require('../models/File');      // your Mongoose schema
-const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
 
 
