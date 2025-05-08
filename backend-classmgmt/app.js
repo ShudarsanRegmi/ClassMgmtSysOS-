@@ -7,6 +7,7 @@ const crRoutes = require('./routes/crRoutes');
 const classRoutes = require('./routes/classRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const semesterRoutes = require('./routes/semesterRoutes');
 const connectDB = require('./config/db');
 
 const cors = require('cors');
@@ -31,8 +32,7 @@ app.use('/api/cr', crRoutes);
 app.use('/api', classRoutes);
 app.use('/api', semesterRoutes);
 app.use('/api', courseRoutes);
-
-
+app.use('/api/sem', semesterRoutes);
 
 
 // Set up the default route or any other necessary routes

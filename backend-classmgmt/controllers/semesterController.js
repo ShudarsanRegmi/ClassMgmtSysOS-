@@ -1,20 +1,34 @@
 // controllers/semesterController.js
 const Semester = require('../models/Semester');
 
-exports.createSemester = async (req, res) => {
+const createSemester = async (req, res) => {
   try {
     const { name, year, classId } = req.body;
 
-    const newSemester = new Semester({
+    // Check if this class already has a semester with the same name
+    const existingSemester = await Semester.findOne({ name, classId });
+    if (existingSemester) {
+      return res.status(400).json({
+        error: `Semester "${name}" already exists for this class.`,
+      });
+    }
+
+    const semester = new Semester({
       name,
       year,
       classId,
-      courses: [],
     });
 
-    await newSemester.save();
-    res.status(201).json({ message: 'Semester created successfully', semester: newSemester });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create semester' });
+    await semester.save();
+
+    res.status(201).json({
+      message: 'Semester created successfully!',
+      semester,
+    });
+  } catch (err) {
+    console.error('Error creating semester:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+module.exports = {createSemester};
