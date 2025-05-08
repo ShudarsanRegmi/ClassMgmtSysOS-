@@ -10,7 +10,9 @@ import Logout from "./components/Logout";
 import Fileupload from "./components/Fileupload";
 import CRDashboard from "./pages/CR/CRDashboard";
 import AddClass from './pages/Class/AddClass';
+import AddSemester from "./pages/Sem/AddSemester";
 import {useAuth} from "./context/AuthContext";
+
 import "./App.css";
 
 function App() {
@@ -109,6 +111,8 @@ function App() {
             <CRDashboard />
           </PrivateRoute>} />
           <Route path="/class/add" element={<PrivateRoute><AddClass /></PrivateRoute>} />
+          <Route path="/sem/add" element={<PrivateRoute><AddSemester /></PrivateRoute>} />
+
         </Routes>
       </main>
     </Router>
