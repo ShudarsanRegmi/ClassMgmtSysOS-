@@ -3,34 +3,6 @@ const cloudinary = require('../utils/cloudinary'); // your Cloudinary config mod
 const File = require('../models/File');      // your Mongoose schema
 const fs = require('fs');
 
-
-// POST /api/files/upload
-// const uploadFile = async (req, res) => {
-//     console.log("backend received the file upload request")
-//     try {
-//         console.log(req);
-//         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-
-
-//         const result = await cloudinary.uploader.upload(req.file.path, {
-//             folder: 'clsasmgmt', // optional: helps organize files
-//         });
-
-//         const newFile = new File({
-//             public_id: result.public_id,
-//             url: result.secure_url,
-//             original_name: req.file.originalname,
-//         });
-
-//         await newFile.save();
-
-//         res.status(201).json({ message: 'File uploaded successfully', file: newFile });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Upload failed' });
-//     }
-// };
-
 const uploadFile = async (req, res) => {
     console.log("Received file upload request");
 
