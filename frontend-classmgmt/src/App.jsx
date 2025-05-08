@@ -9,6 +9,7 @@ import Profile from './components/Profile';
 import Logout from "./components/Logout";
 import Fileupload from "./components/Fileupload";
 import CRDashboard from "./pages/CR/CRDashboard";
+import AddClass from './components/AddClass';
 import {useAuth} from "./context/AuthContext";
 import "./App.css";
 
@@ -107,6 +108,7 @@ function App() {
           <Route path="/cr/dashboard" element={<PrivateRoute>
             <CRDashboard />
           </PrivateRoute>} />
+          <Route path="/class/add" element={<PrivateRoute><AddClass /></PrivateRoute>} />
         </Routes>
       </main>
     </Router>
