@@ -4,12 +4,17 @@ const admin = require('./firebaseAdmin');
 const userRouter = require('./routes/userRoutes')
 const fileRoutes = require('./routes/fileRoutes');
 const crRoutes = require('./routes/crRoutes');
+const classRoutes = require('./routes/classRoutes');
+const semesterRoutes = require('./routes/semesterRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 const connectDB = require('./config/db');
 
 const cors = require('cors');
 
 const dotenv = require('dotenv');
 require('dotenv').config();
+
+
 
 // Connect to DB
 connectDB();
@@ -23,6 +28,11 @@ app.use(cors());
 app.use('/api', userRouter); 
 app.use('/api/files/', fileRoutes);
 app.use('/api/cr', crRoutes);
+app.use('/api', classRoutes);
+app.use('/api', semesterRoutes);
+app.use('/api', courseRoutes);
+
+
 
 
 // Set up the default route or any other necessary routes
