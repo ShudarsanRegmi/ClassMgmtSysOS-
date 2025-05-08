@@ -1,12 +1,14 @@
 // controllers/classController.js
 const Class = require('../models/Class');
 
-exports.createClass = async (req, res) => {
+const createClass = async (req, res) => {
+  console.log("server got the request..");
   try {
-    const { name, year, department, section } = req.body;
+    const { name, classId, year, department, section } = req.body;
 
     const newClass = new Class({
       name,
+      classId,
       year,
       department,
       section,
@@ -18,6 +20,9 @@ exports.createClass = async (req, res) => {
     await newClass.save();
     res.status(201).json({ message: 'Class created successfully', class: newClass });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: 'Failed to create class' });
   }
 };
+
+module.exports = {createClass};

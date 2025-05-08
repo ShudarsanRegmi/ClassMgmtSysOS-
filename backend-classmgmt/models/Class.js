@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const classSchema = new mongoose.Schema({
   name: String,
+  classId: String, 
   year: Number,
   department: String,
   section: String,
