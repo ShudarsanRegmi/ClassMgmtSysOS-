@@ -1,111 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
 const AddSemester = () => {
-  const [name, setName] = useState('');
-  const [year, setYear] = useState('');
-  const [classId, setClassId] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    semcode: '',
+    year: '',
+    classId: ''
+  });
+
   const [message, setMessage] = useState('');
-  const [classes, setClasses] = useState([]);
 
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const res = await axios.get('/api/classes');
-        const data = Array.isArray(res.data) ? res.data : [];
-
-        setClasses(
-          data.length > 0
-            ? data
-            : [
-                { _id: 'sample-class-1', name: 'CSE A - 2023' },
-                { _id: 'sample-class-2', name: 'IT B - 2024' }
-              ]
-        );
-      } catch (err) {
-        console.error('Error fetching classes:', err);
-        setClasses([
-          { _id: 'sample-class-1', name: 'CSE A - 2023' },
-          { _id: 'sample-class-2', name: 'IT B - 2024' }
-        ]);
-      }
-    };
-
-    fetchClasses();
-  }, []);
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
 
     try {
-      const res = await axios.post('/api/semesters', {
-        name,
-        year,
-        classId
-      });
-      setMessage('Semester created successfully!');
-      setName('');
-      setYear('');
-      setClassId('');
+      const res = await axios.post('http://localhost:3001/api/sem/create', formData);
+      setMessage('✅ Semester created successfully!');
+      setFormData({ name: '', semcode: '', year: '', classId: '' });
     } catch (err) {
-      console.error('Error creating semester:', err);
-      const errorMsg = err.response?.data?.error || 'Something went wrong';
-      setMessage(`Error: ${errorMsg}`);
+      setMessage('❌ Error creating semester. Check console for details.');
+      console.error(err);
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Create New Semester</h2>
-      {message && (
-        <p className="mb-4 text-sm text-blue-600">{message}</p>
-      )}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Semester Name:</label>
+    <div className="max-w-md mx-auto bg-white shadow-lg p-6 rounded-lg mt-10">
+      <h2 className="text-2xl font-bold mb-4 text-center">Create Semester</h2>
+      
+      {message && <p className="mb-4 text-sm text-center">{message}</p>}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-medium mb-1">Semester Name</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            name="name"
             placeholder="e.g. Semester 1"
+            className="w-full p-2 border border-gray-300 rounded"
+            value={formData.name}
+            onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Year:</label>
+        <div>
+          <label className="block font-medium mb-1">Semester Code</label>
+          <input
+            type="text"
+            name="semcode"
+            placeholder="e.g. SEM1"
+            className="w-full p-2 border border-gray-300 rounded"
+            value={formData.semcode}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Academic Year</label>
           <input
             type="number"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            placeholder="e.g. 2025"
+            name="year"
+            placeholder="e.g. 1"
+            className="w-full p-2 border border-gray-300 rounded"
+            value={formData.year}
+            onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Class:</label>
-          <select
-            value={classId}
-            onChange={(e) => setClassId(e.target.value)}
+        <div>
+          <label className="block font-medium mb-1">Class ID</label>
+          <input
+            type="text"
+            name="classId"
+            placeholder="Enter class ObjectId"
+            className="w-full p-2 border border-gray-300 rounded"
+            value={formData.classId}
+            onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select a class</option>
-            {classes.map(cls => (
-              <option key={cls._id} value={cls._id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
           Create Semester
         </button>
