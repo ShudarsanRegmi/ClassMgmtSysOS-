@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Home from './components/Home';
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ProfileForm from "./components/ProfileForm";
@@ -12,6 +13,7 @@ import CRDashboard from "./pages/CR/CRDashboard";
 import AddClass from './pages/Class/AddClass';
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateFaculty from "./pages/Faculties/CreateFaculty";
+import CreateCourse from "./pages/Courses/CreateCourse";
 import {useAuth} from "./context/AuthContext";
 
 import "./App.css";
@@ -97,7 +99,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile-form" element={<ProfileForm />} />
-          <Route path="/" element={<div>Welcome to the Homepage</div>} />
+          <Route path="/" element={<Home />} />
           <Route path="/logout" element={<Logout />} />
           <Route path='/dashboard' element={<PrivateRoute>
               <Dashboard />
@@ -114,6 +116,8 @@ function App() {
           <Route path="/class/add" element={<PrivateRoute><AddClass /></PrivateRoute>} />
           <Route path="/sem/add" element={<PrivateRoute><AddSemester /></PrivateRoute>} />
           <Route path="/faculties/register" element={<PrivateRoute><CreateFaculty /></PrivateRoute>} />
+          <Route path="/courses/create" element={<PrivateRoute><CreateCourse /></PrivateRoute>} />
+
         </Routes>
       </main>
     </Router>
