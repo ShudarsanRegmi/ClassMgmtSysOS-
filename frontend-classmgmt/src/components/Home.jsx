@@ -74,8 +74,18 @@ const Home = () => {
           <li><Link to="/fileupload" className="text-blue-600 hover:underline">File Upload</Link></li>
         </ul>
       </section>
+
+    {/* 🛠️ Admin Routes */}
+    <section>
+      <h3 className="text-xl font-semibold text-teal-700">🛠️ Admin</h3>
+      <ul className="list-disc list-inside space-y-1 mt-2">
+        <li><Link to="/admin/settings" className="text-blue-600 hover:underline">Admin Settings</Link></li>
+      </ul>
+    </section>
     </div>
+
   );
 };
+
 
 export default Home;
