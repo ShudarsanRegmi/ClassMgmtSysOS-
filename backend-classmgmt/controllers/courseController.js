@@ -1,32 +1,42 @@
-// controllers/courseController.js
 const Course = require('../models/Course');
-const Semester = require('../models/Semester');
+const Faculty = require('../models/Faculties');
 
+// Create Course
 const createCourse = async (req, res) => {
   try {
-    const { title, code, semesterId, faculties, credits } = req.body;
+    const { title, code, semcode, faculties, credits } = req.body;
+
+    if (!title || !code || !semcode) {
+      return res.status(400).json({ message: "Required fields missing." });
+    }
 
     const newCourse = new Course({
       title,
       code,
-      semester: semesterId,
+      semcode,
       faculties,
       credits,
     });
 
-    await newCourse.save();
+    const saved = await newCourse.save();
+    res.status(201).json({ message: "Course created", data: saved });
 
-    // Add course to the semester's courses array
-    await Semester.findByIdAndUpdate(semesterId, {
-      $push: { courses: newCourse._id },
-    });
-
-    res.status(201).json({ message: 'Course created successfully', course: newCourse });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create course' });
+    console.error("Error creating course:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-module.exports = {
-    createCourse,
-};
+
+// // Send list of faculties for dropdown
+// const getFaculties = async (req, res) => {
+//   try {
+//     const faculties = await Faculty.find({}, 'name _id');
+//     res.status(200).json(faculties);
+//   } catch (err) {
+//     res.status(500).json({ message: "Couldn't fetch faculty list." });
+//   }
+// };
+
+
+module.exports = {createCourse};
