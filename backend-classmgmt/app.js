@@ -30,12 +30,11 @@ app.use('/api', userRouter);
 app.use('/api/files/', fileRoutes);
 app.use('/api/cr', crRoutes);
 app.use('/api', classRoutes);
-app.use('/api', courseRoutes);
+app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 
 
 app.use('/api/admin/faculty', facultyRoutes);
-
 
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {
