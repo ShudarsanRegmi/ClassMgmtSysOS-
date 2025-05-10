@@ -23,10 +23,10 @@ const AddSemester = () => {
 
     try {
       const res = await axios.post('http://localhost:3001/api/sem/create', formData);
-      setMessage('✅ Semester created successfully!');
+      setMessage('Semester created successfully!');
       setFormData({ name: '', semcode: '', year: '', classId: '' });
     } catch (err) {
-      setMessage('❌ Error creating semester. Check console for details.');
+      setMessage('Error creating semester. Check console for details.');
       console.error(err);
     }
   };
