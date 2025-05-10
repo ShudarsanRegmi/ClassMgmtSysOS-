@@ -3,7 +3,7 @@ const Semester = require('../models/Semester');
 
 const createSemester = async (req, res) => {
   try {
-    const { name, year, classId } = req.body;
+    const { name, semcode, year, classId } = req.body;
 
     // Check if this class already has a semester with the same name
     const existingSemester = await Semester.findOne({ name, classId });
@@ -15,6 +15,7 @@ const createSemester = async (req, res) => {
 
     const semester = new Semester({
       name,
+      semcode, 
       year,
       classId,
     });

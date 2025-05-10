@@ -6,7 +6,7 @@ const semesterSchema = new mongoose.Schema({
   year: { type: Number, required: true }, // first year, second year
   courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
   createdAt: { type: Date, default: Date.now },
-  classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true }
+  classId: { type: String, required: true } 
 });
 
 
