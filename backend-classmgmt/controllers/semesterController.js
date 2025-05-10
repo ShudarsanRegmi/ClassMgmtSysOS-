@@ -32,4 +32,14 @@ const createSemester = async (req, res) => {
   }
 };
 
-module.exports = {createSemester};
+const getAllSemesters = async (req, res) => {
+  try {
+    const semesters = await Semester.find();
+    res.status(200).json(semesters);
+  } catch (err) {
+    console.error('Error fetching semesters:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = {createSemester, getAllSemesters};

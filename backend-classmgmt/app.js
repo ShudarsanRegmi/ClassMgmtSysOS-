@@ -8,6 +8,7 @@ const classRoutes = require('./routes/classRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
+const settingsRoutes = require('./routes/systemSettingsRoutes');
 const connectDB = require('./config/db');
 
 const cors = require('cors');
@@ -35,6 +36,7 @@ app.use('/api/sem', semesterRoutes);
 
 
 app.use('/api/admin/faculty', facultyRoutes);
+app.use('/api/admin/settings', settingsRoutes);
 
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {

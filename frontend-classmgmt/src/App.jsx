@@ -14,6 +14,7 @@ import AddClass from './pages/Class/AddClass';
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateFaculty from "./pages/Faculties/CreateFaculty";
 import CreateCourse from "./pages/Courses/CreateCourse";
+import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
 import {useAuth} from "./context/AuthContext";
 
 import "./App.css";
@@ -117,6 +118,7 @@ function App() {
           <Route path="/sem/add" element={<PrivateRoute><AddSemester /></PrivateRoute>} />
           <Route path="/faculties/register" element={<PrivateRoute><CreateFaculty /></PrivateRoute>} />
           <Route path="/courses/create" element={<PrivateRoute><CreateCourse /></PrivateRoute>} />
+          <Route path="/admin/settings" element={<PrivateRoute><SystemSettingsForm /></PrivateRoute>} />
 
         </Routes>
       </main>
