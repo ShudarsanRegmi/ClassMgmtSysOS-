@@ -2,19 +2,17 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from "../context/AuthContext";
 
 const ProfileForm = () => {
-  const {currentUser} = useAuth(); // getting the state via context API
-  console.log(currentUser)
+  const { currentUser } = useAuth();
   const [email, setEmail] = useState(currentUser?.email || "");
   const [name, setName] = useState("");
   const [role, setRole] = useState("student");
   const [phone, setPhone] = useState("");
   const [classId, setclassId] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState("");
-
-  
 
   const navigate = useNavigate();
 
@@ -26,21 +24,24 @@ const ProfileForm = () => {
       const auth = getAuth();
       const user = auth.currentUser;
 
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
 
       const token = await user.getIdToken();
+      const formData = new FormData();
 
-      await axios.post(
-        "http://localhost:3001/api/complete-profile",
-        { name, email, role, phone, classId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("role", role);
+      formData.append("phone", phone);
+      formData.append("classId", classId);
+      if (profilePhoto) formData.append("profilePhoto", profilePhoto);
+
+      await axios.post("http://localhost:3001/api/complete-profile", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("Profile completed!");
       navigate("/");
@@ -52,10 +53,10 @@ const ProfileForm = () => {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-700 text-center">Complete Your Profile</h2>
-
+      <h2 className="text-2xl font-bold mb-6 text-gray-700 text-center">
+        Complete Your Profile
+      </h2>
       {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
@@ -65,7 +66,6 @@ const ProfileForm = () => {
           onChange={(e) => setName(e.target.value)}
           required
         />
-
         <input
           type="email"
           placeholder="Email"
@@ -73,7 +73,6 @@ const ProfileForm = () => {
           value={email}
           disabled
         />
-
         <select
           className="w-full border border-gray-300 rounded-md p-3"
           value={role}
@@ -84,7 +83,6 @@ const ProfileForm = () => {
           <option value="CR">Class Representative (CR)</option>
           <option value="CA">Class Advisor (CA)</option>
         </select>
-
         <input
           type="tel"
           placeholder="Phone Number"
@@ -93,7 +91,6 @@ const ProfileForm = () => {
           onChange={(e) => setPhone(e.target.value)}
           required
         />
-
         <input
           type="text"
           placeholder="Class Id"
@@ -102,8 +99,16 @@ const ProfileForm = () => {
           onChange={(e) => setclassId(e.target.value)}
           required
         />
-
-        <button type="submit" className="bg-blue-600 text-white w-full py-2 rounded-md hover:bg-blue-700 transition">
+        <input
+          type="file"
+          accept="image/*"
+          className="w-full border border-gray-300 rounded-md p-3"
+          onChange={(e) => setProfilePhoto(e.target.files[0])}
+        />
+        <button
+          type="submit"
+          className="bg-blue-600 text-white w-full py-2 rounded-md hover:bg-blue-700 transition"
+        >
           Save Profile
         </button>
       </form>
