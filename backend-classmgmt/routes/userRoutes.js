@@ -13,12 +13,11 @@ const {
 
 
 const verifyToken = require('../middleware/authmiddleware'); // Todo: To confirm that this modularization works fine
-
-// const verifyToken = require('../middleware/authMiddleware');
-
+const upload = require('../middleware/uploadMiddleware');
 
 router.get('/check', verifyToken, check);
-router.post("/complete-profile", verifyToken, completeProfile);
+// router.post("/complete-profile", verifyToken, completeProfile);
+router.post('/complete-profile', verifyToken, upload.single('profilePhoto'), completeProfile);
 router.get('/profile', verifyToken, getUserProfile);
 
 
