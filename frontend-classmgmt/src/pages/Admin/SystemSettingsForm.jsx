@@ -56,7 +56,7 @@ const SystemSettingsForm = () => {
       <h2 className="text-xl font-bold mb-4">🛠 System Settings</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Academic Year</label>
+          <label classdName="block font-semibold mb-1">Academic Year</label>
           <input
             type="text"
             className="w-full p-2 border rounded"
