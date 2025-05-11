@@ -134,17 +134,23 @@ const completeProfile = async (req, res) => {
 
 
 const getUserProfile = async (req, res) => {
+  console.log('getting user profile..');
   try {
     const uid = req.user.uid; // From Firebase token middleware
 
-    console.log("user id ",  uid);
+    console.log("user id ", uid);
 
-    const user = await User.findOne({ uid }).populate('classId', 'name');
+    const user = await User.findOne({ uid }).populate('classId', 'name').populate('photoUrl', 'url');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ user });
+    const userResponse = {
+      ...user.toObject(),
+      photoUrl: user.photoUrl?.url || null, // Send the original URL if photoUrl exists
+    };
+
+    res.json({ user: userResponse });
   } catch (error) {
     console.error('Error fetching user profile:', error.message);
     res.status(500).json({ message: 'Server error' });
