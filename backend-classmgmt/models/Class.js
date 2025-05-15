@@ -6,6 +6,7 @@ const classSchema = new mongoose.Schema({
   year: Number,
   department: String,
   section: String,
+  photoUrl: String, 
   crs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   cas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
