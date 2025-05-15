@@ -11,11 +11,14 @@ const facultyRoutes = require('./routes/facultyRoutes');
 const settingsRoutes = require('./routes/systemSettingsRoutes');
 const connectDB = require('./config/db');
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swaggerOptions");
+
+
 const cors = require('cors');
 
 const dotenv = require('dotenv');
 require('dotenv').config();
-
 
 
 // Connect to DB
@@ -27,10 +30,12 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/api', userRouter); 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use('/api/', userRouter); 
 app.use('/api/files/', fileRoutes);
 app.use('/api/cr', crRoutes);
-app.use('/api', classRoutes);
+app.use('/api/class', classRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 

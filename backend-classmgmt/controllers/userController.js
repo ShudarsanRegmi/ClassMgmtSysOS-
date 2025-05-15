@@ -9,6 +9,8 @@ const check = async(req, res) => {
 const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const { saveFileMetadata } = require('../services/FileService');
 const fs = require('fs');
+
+
 const completeProfile = async (req, res) => {
   console.log("Completing profile...");
 
@@ -144,6 +146,7 @@ const getAllUsers = async (req, res) => {
 };
 
 
+
 const getUsersByType = async (req, res) => {
   try {
     const { role, classId } = req.query;
@@ -168,12 +171,37 @@ const getUsersByType = async (req, res) => {
 };
 
 
+const getUserByUid = async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    if (!uid) {
+      return res.status(400).json({ message: 'User UID is required' });
+    }
+
+    const user = await User.findOne({ uid })
+      .populate('classId', 'name') // Populate class details if needed
+      .populate('photoUrl', 'url'); // Populate photo details if needed
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching user by UID:', err.message);
+    res.status(500).json({ message: 'Error fetching user by UID', error: err.message });
+  }
+};
+
+
 module.exports = {
     completeProfile,
     getUserProfile, 
     updateUserRole, 
     getAllUsers,
     getUsersByType,
+    getUserByUid,
     check
 };
 
