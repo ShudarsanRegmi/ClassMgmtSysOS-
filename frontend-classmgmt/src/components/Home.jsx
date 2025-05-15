@@ -53,9 +53,12 @@ const Home = () => {
 
       {/* 🏫 Class Management */}
       <section>
-        <h3 className="text-xl font-semibold text-red-700">🏫 Classes</h3>
+        <h3 className="text-xl font-semibold text-red-700">🏫 Class Management</h3>
         <ul className="list-disc list-inside space-y-1 mt-2">
           <li><Link to="/class/add" className="text-blue-600 hover:underline">Add Class</Link></li>
+        </ul>
+        <ul className="list-disc list-inside space-y-1 mt-2">
+          <li><Link to="/class/home" className="text-blue-600 hover:underline">Go to Class Homepage</Link></li>
         </ul>
       </section>
 

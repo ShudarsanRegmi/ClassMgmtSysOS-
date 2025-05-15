@@ -114,7 +114,11 @@ function App() {
           <Route path="/cr/dashboard" element={<PrivateRoute>
             <CRDashboard />
           </PrivateRoute>} />
+          {/* paths for classes */}
           <Route path="/class/add" element={<PrivateRoute><AddClass /></PrivateRoute>} />
+          <Route path="/class/home" element={<PrivateRoute><AddClass /></PrivateRoute>} />
+
+
           <Route path="/sem/add" element={<PrivateRoute><AddSemester /></PrivateRoute>} />
           <Route path="/faculties/register" element={<PrivateRoute><CreateFaculty /></PrivateRoute>} />
           <Route path="/courses/create" element={<PrivateRoute><CreateCourse /></PrivateRoute>} />
