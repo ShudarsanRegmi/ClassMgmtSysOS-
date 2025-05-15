@@ -56,6 +56,7 @@ const CreateFaculty = () => {
         </div>
 
         <button
+          data-testid="submit-button"
           type="submit"
           className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700"
         >

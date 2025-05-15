@@ -2,7 +2,7 @@ const User = require('../models/User');
 const { userProfileDto, userListDto } = require('../dtos/user.dto'); // adjust path as needed
 
 const check = async(req, res) => {
-    return res.status(200).json({message: 'Hello from the check route'});
+    return res.status(200).json({message: 'Hello from the check route. You\'re authorized..'});
 }
 
 

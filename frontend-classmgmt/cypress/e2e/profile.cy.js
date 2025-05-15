@@ -1,26 +1,27 @@
-describe('Profile Integration Test', () => {
-    it('should show valid email if user is returned, otherwise fail cleanly', () => {
+describe('Profile Page', () => {
+    beforeEach(() => {
+      // Assumes user is already logged in
       cy.visit('http://localhost:5173/profile');
+    });
   
-      // Wait for either a valid user OR an error message
+    it('should show a valid email if the user exists', () => {
+      // Wait for the loading message to disappear
+      cy.contains('Loading...').should('not.exist');
+  
+      // Now check the body for either the profile or the error message
       cy.get('body').then(($body) => {
-        const bodyText = $body.text();
-  
-        if (bodyText.includes('User not found')) {
-          throw new Error('❌ Backend failed or user not returned.');
-        }
-  
-        // Look for the Email: label (if it’s present, the backend worked)
-        if (bodyText.includes('Email:')) {
+        if ($body.text().includes('User not found')) {
+          throw new Error('User not found – profile did not load successfully');
+        } else {
+          // Find the email line and extract the actual email text
           cy.contains('Email:')
-            .parent()
+            .parent() // Ensure we are targeting the parent element containing the email text
             .invoke('text')
             .then((text) => {
-              const emailMatch = text.match(/[^\s@]+@[^\s@]+\.[^\s@]+/);
-              expect(emailMatch).to.not.be.null;
+              const email = text.match(/Email:\s*(.*)/)?.[1]?.trim(); // Extract email using regex
+              cy.log(`Extracted email: ${email}`);
+              expect(email, 'Email should be valid').to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
             });
-        } else {
-          throw new Error('❌ Expected "Email:" but did not find it.');
         }
       });
     });

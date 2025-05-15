@@ -19,6 +19,11 @@ import {useAuth} from "./context/AuthContext";
 
 import "./App.css";
 
+// for making auth token avaiable to cypress
+import { auth } from './firebase';
+// Add this line somewhere during app load
+window.firebase = { auth };
+
 function App() {
   const {currentUser} = useAuth(); // getting the state via context API
   return (
