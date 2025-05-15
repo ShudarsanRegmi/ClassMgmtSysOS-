@@ -19,6 +19,30 @@ const createFaculty = async (req, res) => {
   }
 };
 
+// Delete a faculty by UID
+const deleteFacultyByid = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID is required." });
+    }
+
+    const deletedFaculty = await Faculty.findOneAndDelete({ _id: id });
+
+    if (!deletedFaculty) {
+      return res.status(404).json({ message: "Faculty not found." });
+    }
+
+    res.status(200).json({ message: "Faculty deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting faculty:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
 // (Optional) Get all faculties
 const getFaculties = async (req, res) => {
   try {
@@ -29,4 +53,4 @@ const getFaculties = async (req, res) => {
   }
 };
 
-module.exports = {createFaculty, getFaculties};
+module.exports = { createFaculty, getFaculties, deleteFacultyByid };

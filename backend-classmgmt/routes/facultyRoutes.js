@@ -6,5 +6,6 @@ const facultyController = require('../controllers/facultyController');
 
 router.post('/register', facultyController.createFaculty);
 router.get('/getFaculties', facultyController.getFaculties); // for dropdown in frontend
+router.delete('/deleteFaculty/:id', facultyController.deleteFacultyByid);
 
 module.exports = router;

@@ -4,3 +4,5 @@ serviceAccountKey.json
 .env
 backend-classmgmt/.env
 ./uploads
+frontend-classmgmt/.env
+cypress.env.json
