@@ -6,3 +6,4 @@ backend-classmgmt/.env
 ./uploads
 frontend-classmgmt/.env
 cypress.env.json
+backend-classmgmt/uploads/
