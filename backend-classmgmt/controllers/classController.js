@@ -25,4 +25,33 @@ const createClass = async (req, res) => {
   }
 };
 
-module.exports = {createClass};
+const getAllClasses = async (req, res) => {
+  try {
+    const classes = await Class.find();
+    res.status(200).json(classes);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Failed to fetch classes' });
+  }
+};
+
+const deleteClassById = async (req, res) => {
+  try {
+    const { classId } = req.params;
+
+    const deletedClass = await Class.findOneAndDelete({ classId });
+
+    if (!deletedClass) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    res.status(200).json({ message: 'Class deleted successfully', class: deletedClass });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Failed to delete class' });
+  }
+};
+
+
+
+module.exports = {createClass, getAllClasses, deleteClassById};
