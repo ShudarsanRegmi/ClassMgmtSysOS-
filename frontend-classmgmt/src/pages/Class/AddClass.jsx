@@ -1,4 +1,3 @@
-// src/components/AddClass.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -11,24 +10,30 @@ const AddClass = () => {
     section: '',
   });
 
+  const [error, setError] = useState(''); // State to track errors
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(''); // Clear error when user starts typing
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/api/classes', formData);
+      const response = await axios.post('http://localhost:3001/api/class/create', formData);
       alert('Class created successfully!');
       setFormData({ name: '', classId: '', year: '', department: '', section: '' });
+      setError(''); // Clear error on successful submission
     } catch (error) {
       console.error('Error creating class:', error);
+      setError('Failed to create class. Please try again.'); // Set error message
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
       <h2 className="text-2xl font-bold mb-4">Add New Class</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>} {/* Display error message */}
       <input
         type="text"
         name="name"
@@ -80,8 +85,6 @@ const AddClass = () => {
       >
         Create Class
       </button>
-
-      
     </form>
   );
 };
