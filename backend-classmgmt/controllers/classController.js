@@ -1,10 +1,22 @@
 // controllers/classController.js
 const Class = require('../models/Class');
+const uploadToCloudinary = require('../utils/cloudinaryUploader');
+const fs = require('fs');
 
 const createClass = async (req, res) => {
-  console.log("server got the request..");
+  console.log("Creating class...");
+
   try {
     const { name, classId, year, department, section } = req.body;
+
+    let photoUrl = '';
+
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.path, 'class_photos');
+      photoUrl = result.secure_url;
+
+      fs.unlinkSync(req.file.path); // delete temp file
+    }
 
     const newClass = new Class({
       name,
@@ -12,6 +24,7 @@ const createClass = async (req, res) => {
       year,
       department,
       section,
+      photoUrl,
       crs: [],
       cas: [],
       students: [],
@@ -19,8 +32,9 @@ const createClass = async (req, res) => {
 
     await newClass.save();
     res.status(201).json({ message: 'Class created successfully', class: newClass });
+
   } catch (error) {
-    console.log(error);
+    console.error("Error creating class:", error);
     res.status(500).json({ error: 'Failed to create class' });
   }
 };
