@@ -91,7 +91,15 @@ const express = require('express');
 const router = express.Router();
 const classController = require('../controllers/classController');
 
-router.post('/classes', classController.createClass);
+
+
+// /api/class/create - POST
+// /api/class/delete - DELETE
+// /api/class/getAllClasses - GET
+router.post('/create', classController.createClass);
+router.delete('/delete/:classId', classController.deleteClassById); // Delete class by ID
+router.get('/getAllClasses', classController.getAllClasses);
+
 
 
 
