@@ -11,6 +11,7 @@ import Logout from "./components/Logout";
 import Fileupload from "./components/Fileupload";
 import CRDashboard from "./pages/CR/CRDashboard";
 import AddClass from './pages/Class/AddClass';
+import ClassHomepage from "./pages/Class/ClassHomepage";
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateFaculty from "./pages/Faculties/CreateFaculty";
 import CreateCourse from "./pages/Courses/CreateCourse";
@@ -121,7 +122,7 @@ function App() {
           </PrivateRoute>} />
           {/* paths for classes */}
           <Route path="/class/add" element={<PrivateRoute><AddClass /></PrivateRoute>} />
-          <Route path="/class/home" element={<PrivateRoute><AddClass /></PrivateRoute>} />
+          <Route path="/class/home" element={<PrivateRoute><ClassHomepage /></PrivateRoute>} />
 
 
           <Route path="/sem/add" element={<PrivateRoute><AddSemester /></PrivateRoute>} />
