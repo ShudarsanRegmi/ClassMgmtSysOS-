@@ -91,7 +91,7 @@ const express = require('express');
 const router = express.Router();
 const classController = require('../controllers/classController');
 const upload = require('../middleware/uploadMiddleware');
-
+const { getClassHomepage } = require('../controllers/classController');
 
 
 // /api/class/create - POST
@@ -103,41 +103,15 @@ router.get('/getAllClasses', classController.getAllClasses);
 
 
 
+// Fetch class homepage data
+router.get('/homepage/:uid', classController.fetchClassHomepage);
 
-// GET class homepage data
-router.get('/classHomepage/:uid', async (req, res) => {
-  try {
-    const { uid } = req.params;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
 
-    const user = await User.findOne({ uid });
+// Fetch paginated students of a class
+router.get('students/:classId', classController.fetchPaginatedStudents);
 
-    if (!user || !user.classId) {
-      return res.status(404).json({ error: 'User or class not found' });
-    }
 
-    const classInfo = await Class.findOne({ classId: user.classId })
-      .populate('crs', 'name photoUrl')
-      .populate('cas', 'name photoUrl');
-
-    const students = await User.find({ classId: user.classId, role: 'student' })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .select('name photoUrl');
-
-    const totalStudents = await User.countDocuments({ classId: user.classId, role: 'student' });
-
-    res.json({
-      classInfo,
-      students,
-      totalPages: Math.ceil(totalStudents / limit),
-      currentPage: page
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+router.get('/:classId/details', classController.getClassDetails);
 
 
 module.exports = router;
