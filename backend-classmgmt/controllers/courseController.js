@@ -26,6 +26,19 @@ const createCourse = async (req, res) => {
 };
 
 
+// Get All Courses
+const getAllCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({});
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
 // // Send list of faculties for dropdown
 // const getFaculties = async (req, res) => {
 //   try {
@@ -37,4 +50,4 @@ const createCourse = async (req, res) => {
 // };
 
 
-module.exports = {createCourse};
+module.exports = { createCourse, getAllCourses };
