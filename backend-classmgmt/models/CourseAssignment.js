@@ -30,7 +30,7 @@ const courseAssignmentSchema = new Schema({
     default: null
   },
   assignedBy: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User', // Or Admin/CA
     required: true
   },

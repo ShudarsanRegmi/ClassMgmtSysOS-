@@ -9,6 +9,7 @@ const semesterRoutes = require('./routes/semesterRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
 const settingsRoutes = require('./routes/systemSettingsRoutes');
+const assignmentRoutes = require('./routes/courseAssignment');
 const connectDB = require('./config/db');
 
 const swaggerUi = require("swagger-ui-express");
@@ -40,7 +41,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 
 
-app.use('/api/admin/faculty', facultyRoutes);
+app.use('/api/faculty', facultyRoutes);
+app.use('/api/assignments/', assignmentRoutes);
 app.use('/api/admin/settings', settingsRoutes);
 
 // Set up the default route or any other necessary routes

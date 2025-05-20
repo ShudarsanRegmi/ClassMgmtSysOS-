@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
   photoUrl: {type: mongoose.Schema.Types.ObjectId, ref: 'File',},
   role: {
     type: String,
-    enum: ['Student', 'CR', 'CA', 'Admin', 'SuperAdmin', 'Teacher'],
-    default: 'student',
+    enum: ['STUDENT', 'CR', 'CA', 'ADMIN', 'SUPERADMIN', 'FACULTY'],
+    default: 'STUDENT',
   },
   // classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
   classId: {type: String, required: false},

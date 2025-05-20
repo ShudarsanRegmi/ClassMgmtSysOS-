@@ -1,4 +1,5 @@
 const Faculty = require('../models/Faculties');
+const User = require('../models/User');
 
 // Create a new faculty
 const createFaculty = async (req, res) => {
@@ -46,7 +47,7 @@ const deleteFacultyByid = async (req, res) => {
 // (Optional) Get all faculties
 const getFaculties = async (req, res) => {
   try {
-    const faculties = await Faculty.find();
+    const faculties = await User.find({ role: 'FACULTY' });
     res.status(200).json(faculties);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch faculties." });
