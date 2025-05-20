@@ -4,17 +4,15 @@ const Faculty = require('../models/Faculties');
 // Create Course
 const createCourse = async (req, res) => {
   try {
-    const { title, code, semcode, faculties, credits } = req.body;
+    const { title, code, credits } = req.body;
 
-    if (!title || !code || !semcode) {
+    if (!title || !code) {
       return res.status(400).json({ message: "Required fields missing." });
     }
 
     const newCourse = new Course({
       title,
       code,
-      semcode,
-      faculties,
       credits,
     });
 
