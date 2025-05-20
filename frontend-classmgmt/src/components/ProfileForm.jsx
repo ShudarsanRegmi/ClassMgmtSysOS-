@@ -10,7 +10,7 @@ const ProfileForm = () => {
   const [name, setName] = useState("");
   const [role, setRole] = useState("student");
   const [phone, setPhone] = useState("");
-  const [classId, setclassId] = useState("");
+  const [classId, setClassId] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState("");
 
@@ -33,8 +33,12 @@ const ProfileForm = () => {
       formData.append("email", email);
       formData.append("role", role);
       formData.append("phone", phone);
-      formData.append("classId", classId);
       if (profilePhoto) formData.append("profilePhoto", profilePhoto);
+
+      // Only append classId if the role is not 'faculty'
+      if (role !== "FACULTY" && classId) {
+        formData.append("classId", classId);
+      }
 
       await axios.post("http://localhost:3001/api/complete-profile", formData, {
         headers: {
@@ -78,8 +82,8 @@ const ProfileForm = () => {
           value={role}
           onChange={(e) => setRole(e.target.value)}
         >
-          <option value="student">Student</option>
-          <option value="teacher">Teacher</option>
+          <option value="STUDENT">Student</option>
+          <option value="FACULTY">Teacher</option>
           <option value="CR">Class Representative (CR)</option>
           <option value="CA">Class Advisor (CA)</option>
         </select>
@@ -91,14 +95,19 @@ const ProfileForm = () => {
           onChange={(e) => setPhone(e.target.value)}
           required
         />
-        <input
-          type="text"
-          placeholder="Class Id"
-          className="w-full border border-gray-300 rounded-md p-3"
-          value={classId}
-          onChange={(e) => setclassId(e.target.value)}
-          required
-        />
+
+        {/* Conditionally render Class Id input based on the selected role */}
+        {role !== "FACULTY" && (
+          <input
+            type="text"
+            placeholder="Class Id"
+            className="w-full border border-gray-300 rounded-md p-3"
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
+            required
+          />
+        )}
+
         <input
           type="file"
           accept="image/*"

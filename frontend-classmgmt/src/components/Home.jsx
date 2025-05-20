@@ -41,6 +41,9 @@ const Home = () => {
         <ul className="list-disc list-inside space-y-1 mt-2">
           <li><Link to="/courses/create" className="text-blue-600 hover:underline">Create Course</Link></li>
         </ul>
+        <ul className="list-disc list-inside space-y-1 mt-2">
+          <li><Link to="/courses/assignment" className="text-blue-600 hover:underline">Course Assignment</Link></li>
+        </ul>
       </section>
 
       {/* 🗓️ Semester Management */}
