@@ -127,20 +127,29 @@ const {
     getUsersByType,
     check,
     getUserProfile,
-    getUserByUid
+    getUserByUid,
 } = require('../controllers/userController');
 
 
+const userController = require('../controllers/userController');
+
 const verifyToken = require('../middleware/authmiddleware'); // Todo: To confirm that this modularization works fine
 const upload = require('../middleware/uploadMiddleware');
+
+// full paths /api
 
 router.get('/check', verifyToken, check);
 // router.post("/complete-profile", verifyToken, completeProfile);
 router.post('/complete-profile', verifyToken, upload.single('profilePhoto'), completeProfile);
 router.get('/profile', verifyToken, getUserProfile);
 
-router.get('/getUsersByType', verifyToken, getUsersByType);
+router.get('/getUsersByType', getUsersByType);
 router.get('/getAllUsers', verifyToken, getAllUsers);
 router.get('/getUserByUid/:uid', verifyToken, getUserByUid);
+
+router.get('/class/:classId/students', userController.getStudentsByClass);
+router.get('/class/:classId/crs', userController.getCRsByClass);
+
+
 
 module.exports = router;

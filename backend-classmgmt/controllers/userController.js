@@ -195,6 +195,49 @@ const getUserByUid = async (req, res) => {
 };
 
 
+
+//  for paginated fetching
+const getStudentsByClass = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    console.log('fetching.. ' + classId)
+    const { page = 1, limit = 10 } = req.query;
+
+    const students = await User.find({ classId, role: 'student' })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments({ classId, role: 'student' });
+
+    res.status(200).json({
+      students,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// for fetching the cr list
+
+const getCRsByClass = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const crs = await User.find({ classId, role: 'CR' });
+
+    if (crs.length === 0) {
+      return res.status(404).json({ message: 'No CRs assigned to this class' });
+    }
+
+    res.status(200).json({ crs });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+
 module.exports = {
     completeProfile,
     getUserProfile, 
@@ -202,7 +245,10 @@ module.exports = {
     getAllUsers,
     getUsersByType,
     getUserByUid,
-    check
+    check,
+    getStudentsByClass,
+    getCRsByClass,
+
 };
 
 

@@ -1,5 +1,6 @@
 // controllers/classController.js
 const Class = require('../models/Class');
+const User = require('../models/User');
 const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const fs = require('fs');
 
@@ -66,6 +67,84 @@ const deleteClassById = async (req, res) => {
   }
 };
 
+const fetchClassHomepage = async (req, res) => {
+  try {
+    const uid = req.params.uid;
+    const user = await User.findOne({ uid });
+
+    if (!user || !user.classId) {
+      return res.status(404).json({ error: 'User or class not found' });
+    }
+
+    console.log("classId = " + user.classId);
+
+    // const classInfo = await Class.findOne({ classId: user.classId }).populate('crs');
+    const classInfo = await Class.findOne({ classId: user.classId.toString() }).populate('crs');
+
+    
+    if (!classInfo) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    return res.status(200).json({
+      coverPhoto: classInfo.photoUrl,
+      crs: classInfo.crs,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 
 
-module.exports = {createClass, getAllClasses, deleteClassById};
+const fetchPaginatedStudents = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const { classId } = req.params;
+
+    const students = await User.find({ classId, role: 'student' })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .select('name email photoUrl')
+      .populate('photoUrl');
+
+    const count = await User.countDocuments({ classId, role: 'student' });
+
+    return res.status(200).json({
+      students,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to fetch students' });
+  }
+}
+
+
+const getClassDetails = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const classData = await Class.findOne({ classId });
+
+    if (!classData) {
+      return res.status(404).json({ message: 'Class not found' });
+    }
+
+    // Send relevant details as a response
+    const classDetails = {
+      name: classData.name,
+      classId: classData.classId,
+      year: classData.year,
+      department: classData.department,
+      section: classData.section,
+      photoUrl: classData.photoUrl
+    };
+
+    res.status(200).json(classDetails);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {createClass, getAllClasses, deleteClassById, fetchClassHomepage, fetchPaginatedStudents, getClassDetails};
