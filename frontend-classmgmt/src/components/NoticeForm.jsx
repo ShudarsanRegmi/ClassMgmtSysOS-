@@ -15,10 +15,13 @@ import {
     CircularProgress
 } from '@mui/material';
 import { createNotice, getNotice, updateNotice } from '../services/noticeService';
+import { useAuth } from '../context/AuthContext';
 
 const NoticeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { userProfile } = useAuth();
+    
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -58,6 +61,19 @@ const NoticeForm = () => {
         }
     };
 
+    const validateForm = () => {
+        const errors = [];
+        if (!formData.title.trim()) errors.push('Title is required');
+        if (!formData.content.trim()) errors.push('Content is required');
+        if (!['all', 'students', 'teachers', 'staff'].includes(formData.targetAudience)) {
+            errors.push('Invalid target audience');
+        }
+        if (!['low', 'medium', 'high'].includes(formData.priority)) {
+            errors.push('Invalid priority level');
+        }
+        return errors;
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -68,9 +84,21 @@ const NoticeForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validate form
+        const validationErrors = validateForm();
+        if (validationErrors.length > 0) {
+            setError(validationErrors.join(', '));
+            return;
+        }
+
         try {
             setLoading(true);
             setError('');
+            
+            // Log the form data being sent
+            console.log('Submitting form data:', formData);
+
             if (id) {
                 await updateNotice(id, formData);
                 setSuccess('Notice updated successfully!');
@@ -78,6 +106,7 @@ const NoticeForm = () => {
                 await createNotice(formData);
                 setSuccess('Notice created successfully!');
             }
+            
             setTimeout(() => {
                 navigate('/notices');
             }, 1500);
@@ -146,6 +175,8 @@ const NoticeForm = () => {
                         required
                         margin="normal"
                         disabled={loading}
+                        error={!!error && !formData.title.trim()}
+                        helperText={error && !formData.title.trim() ? 'Title is required' : ''}
                     />
 
                     <TextField
@@ -159,6 +190,8 @@ const NoticeForm = () => {
                         rows={4}
                         margin="normal"
                         disabled={loading}
+                        error={!!error && !formData.content.trim()}
+                        helperText={error && !formData.content.trim() ? 'Content is required' : ''}
                     />
 
                     <FormControl fullWidth margin="normal">
