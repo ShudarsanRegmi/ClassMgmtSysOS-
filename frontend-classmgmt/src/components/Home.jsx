@@ -18,6 +18,15 @@ const Home = () => {
         </ul>
       </section>
 
+      {/* 📢 Notice Board */}
+      <section>
+        <h3 className="text-xl font-semibold text-orange-700">📢 Notice Board</h3>
+        <ul className="list-disc list-inside space-y-1 mt-2">
+          <li><Link to="/notices" className="text-blue-600 hover:underline">View All Notices</Link></li>
+          <li><Link to="/notices/create" className="text-blue-600 hover:underline">Create Notice</Link></li>
+        </ul>
+      </section>
+
       {/* 🧑‍💼 Dashboard & Profile */}
       <section>
         <h3 className="text-xl font-semibold text-green-700">🧑‍💼 User Dashboard</h3>
@@ -81,17 +90,15 @@ const Home = () => {
         </ul>
       </section>
 
-    {/* 🛠️ Admin Routes */}
-    <section>
-      <h3 className="text-xl font-semibold text-teal-700">🛠️ Admin</h3>
-      <ul className="list-disc list-inside space-y-1 mt-2">
-        <li><Link to="/admin/settings" className="text-blue-600 hover:underline">Admin Settings</Link></li>
-      </ul>
-    </section>
+      {/* 🛠️ Admin Routes */}
+      <section>
+        <h3 className="text-xl font-semibold text-teal-700">🛠️ Admin</h3>
+        <ul className="list-disc list-inside space-y-1 mt-2">
+          <li><Link to="/admin/settings" className="text-blue-600 hover:underline">Admin Settings</Link></li>
+        </ul>
+      </section>
     </div>
-
   );
 };
-
 
 export default Home;

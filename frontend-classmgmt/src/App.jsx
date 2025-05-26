@@ -18,6 +18,8 @@ import CreateCourse from "./pages/Courses/CreateCourse";
 import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
 import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import {useAuth} from "./context/AuthContext";
+import NoticeBoard from './components/NoticeBoard';
+import NoticeForm from './components/NoticeForm';
 
 import "./App.css";
 
@@ -69,6 +71,12 @@ function App() {
             className="px-4 py-2 bg-white text-green-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
           >
             Dashboard
+          </Link>
+          <Link
+            to="/notices"
+            className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition duration-300"
+          >
+            Notices
           </Link>
           <Link
             to="/logout"
@@ -133,9 +141,11 @@ function App() {
 
 
           <Route path="/courses/assignment" element={<PrivateRoute><CourseAssignmentForm /></PrivateRoute>} />
-
-
           
+          {/* Notice Board Routes */}
+          <Route path="/notices" element={<NoticeBoard />} />
+          <Route path="/notices/create" element={<PrivateRoute><NoticeForm /></PrivateRoute>} />
+          <Route path="/notices/edit/:id" element={<PrivateRoute><NoticeForm /></PrivateRoute>} />
 
         </Routes>
       </main>
