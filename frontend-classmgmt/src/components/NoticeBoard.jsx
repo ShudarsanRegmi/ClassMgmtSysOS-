@@ -24,15 +24,20 @@ const NoticeBoard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { 
+        currentUser,
+        userProfile,
+        userId,
+        userName
+    } = useAuth();
 
     useEffect(() => {
-        console.log('Current user:', {
-            uid: currentUser?.uid,
-            email: currentUser?.email,
-            fullUser: currentUser
+        console.log('Auth State:', {
+            userId,
+            userName,
+            userProfile
         });
-    }, [currentUser]);
+    }, [userId, userName, userProfile]);
 
     const fetchNotices = async () => {
         try {
@@ -93,21 +98,18 @@ const NoticeBoard = () => {
     };
 
     const checkPermissions = (notice) => {
-        const noticeAuthorId = notice.author;
-        const currentUserId = currentUser?.uid;
-
-        console.log("noticeAuthorId", noticeAuthorId);
-        console.log("currentUserId", currentUserId);
-
-        // Log the comparison
+        // Check if user is the author of the notice
+        const isAuthor = notice.author === userId;
+        
+        // Log permission check details
         console.log('Permission check:', {
-            notice: notice._id,
-            authorId: noticeAuthorId,
-            userId: currentUserId,
-            hasPermission: currentUserId === noticeAuthorId.uid
+            noticeId: notice._id,
+            noticeAuthor: notice.author,
+            userId,
+            isAuthor
         });
 
-        return currentUserId === noticeAuthorId.uid;
+        return isAuthor;
     };
 
     if (loading) {
@@ -168,7 +170,7 @@ const NoticeBoard = () => {
                                                     {notice.title}
                                                 </Typography>
                                                 <Typography color="textSecondary" gutterBottom>
-                                                    Posted by {notice.author.name} on {new Date(notice.createdAt).toLocaleDateString()}
+                                                    Posted by {notice.authorName || 'Unknown'} on {new Date(notice.createdAt).toLocaleDateString()}
                                                 </Typography>
                                             </Box>
                                             <Box>
