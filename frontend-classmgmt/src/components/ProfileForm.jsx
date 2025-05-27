@@ -8,7 +8,7 @@ const ProfileForm = () => {
   const { currentUser } = useAuth();
   const [email, setEmail] = useState(currentUser?.email || "");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState("STUDENT");
   const [phone, setPhone] = useState("");
   const [classId, setClassId] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -27,31 +27,41 @@ const ProfileForm = () => {
       if (!user) throw new Error("User not authenticated");
 
       const token = await user.getIdToken();
+      
+      // Create form data
       const formData = new FormData();
-
       formData.append("name", name);
-      formData.append("email", email);
+      formData.append("email", user.email);
       formData.append("role", role);
       formData.append("phone", phone);
-      if (profilePhoto) formData.append("profilePhoto", profilePhoto);
-
-      // Only append classId if the role is not 'faculty'
+      
+      // Only append classId if the role is not 'FACULTY'
       if (role !== "FACULTY" && classId) {
         formData.append("classId", classId);
       }
 
-      await axios.post("http://localhost:3001/api/complete-profile", formData, {
+      // Only append photo if one was selected
+      if (profilePhoto) {
+        formData.append("profilePhoto", profilePhoto);
+      }
+
+      // Log the form data to verify
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      const response = await axios.post("http://localhost:3001/api/complete-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("Profile completed!");
+      console.log("Profile completed successfully:", response.data);
       navigate("/");
     } catch (err) {
       console.error("Profile completion error:", err);
-      setError("Failed to complete profile. Please try again.");
+      setError(err.response?.data?.message || "Failed to complete profile. Please try again.");
     }
   };
 
@@ -96,7 +106,6 @@ const ProfileForm = () => {
           required
         />
 
-        {/* Conditionally render Class Id input based on the selected role */}
         {role !== "FACULTY" && (
           <input
             type="text"
