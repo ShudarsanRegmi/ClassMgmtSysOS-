@@ -22,6 +22,27 @@ const extractUserDetails = (user) => {
     };
 };
 
+// Helper function to merge profile data
+const mergeProfileData = (firebaseUser, mongoProfile) => {
+    if (!mongoProfile) return null;
+    
+    // Keep the MongoDB profile structure but ensure critical fields are from Firebase
+    return {
+        ...mongoProfile,
+        // Use Firebase email as it's authoritative
+        email: firebaseUser.email || mongoProfile.email,
+        // Ensure UID matches
+        uid: firebaseUser.uid,
+        // Keep MongoDB specific fields as is
+        name: mongoProfile.name,
+        role: mongoProfile.role,
+        classId: mongoProfile.classId,
+        phone: mongoProfile.phone,
+        photoUrl: mongoProfile.photoUrl,
+        courses: mongoProfile.courses || []
+    };
+};
+
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
@@ -34,25 +55,30 @@ export const AuthProvider = ({ children }) => {
         
         try {
             const response = await api.get('/profile');
-            const profile = response.data.user;
+            console.log('Profile Response:', response.data);
+            const mongoProfile = response.data.user;
+            
+            // Merge Firebase and MongoDB data
+            const mergedProfile = mergeProfileData(user, mongoProfile);
 
             // Log detailed auth and profile information
             console.group('🔐 Auth Details');
             console.log('Firebase User:', extractUserDetails(user));
-            console.log('MongoDB Profile:', profile);
+            console.log('MongoDB Profile:', mongoProfile);
+            console.log('Merged Profile:', mergedProfile);
             console.log('Auth State:', {
                 isAuthenticated: !!user,
-                hasProfile: !!profile,
-                roles: profile?.role || [],
+                hasProfile: !!mergedProfile,
+                roles: mergedProfile?.role || [],
                 permissions: {
-                    isAdmin: profile?.role === 'ADMIN',
-                    isFaculty: profile?.role === 'FACULTY',
-                    isStudent: profile?.role === 'STUDENT'
+                    isAdmin: mergedProfile?.role === 'ADMIN',
+                    isFaculty: mergedProfile?.role === 'FACULTY',
+                    isStudent: mergedProfile?.role === 'STUDENT'
                 }
             });
             console.groupEnd();
 
-            return profile;
+            return mergedProfile;
         } catch (err) {
             console.error('Error fetching user profile:', err);
             setError('Failed to fetch user profile');
@@ -62,6 +88,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const auth = getAuth();
+        console.log('Auth:', auth);
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
@@ -110,16 +137,18 @@ export const AuthProvider = ({ children }) => {
 
         try {
             const response = await api.put('/profile', profileData);
-            const updatedProfile = response.data.user;
-            setUserProfile(updatedProfile);
+            const updatedMongoProfile = response.data.user;
+            // Merge the updated profile with Firebase data
+            const mergedProfile = mergeProfileData(currentUser, updatedMongoProfile);
+            setUserProfile(mergedProfile);
 
             // Log profile update
             console.group('👤 Profile Updated');
-            console.log('New Profile Data:', updatedProfile);
+            console.log('New Profile Data:', mergedProfile);
             console.log('Update Timestamp:', new Date().toISOString());
             console.groupEnd();
 
-            return updatedProfile;
+            return mergedProfile;
         } catch (err) {
             console.error('Error updating profile:', err);
             throw err;
@@ -151,7 +180,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         currentUser,          // Firebase user object
-        userProfile,          // MongoDB user profile
+        userProfile,          // Merged MongoDB profile with Firebase data
         loading,
         error,
         refreshUserProfile,   // Function to manually refresh profile
@@ -164,8 +193,8 @@ export const AuthProvider = ({ children }) => {
         hasRole,             // Function to check custom roles
         
         // Commonly used user properties
-        userId: currentUser?.uid,
-        userEmail: currentUser?.email,
+        userId: userProfile?.uid || currentUser?.uid,
+        userEmail: currentUser?.email,  // Always use Firebase email
         userName: userProfile?.name,
         userRole: userProfile?.role,
         classId: userProfile?.classId,
