@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: false },
   phone: String,
+  rollNo: { type: String, required: true }, // Adding roll number field
   photoUrl: {type: mongoose.Schema.Types.ObjectId, ref: 'File',},
   role: {
     type: String,

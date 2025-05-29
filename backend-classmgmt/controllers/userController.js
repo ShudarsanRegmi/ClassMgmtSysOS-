@@ -18,7 +18,7 @@ const completeProfile = async (req, res) => {
     const uid = req.user?.uid;
     if (!uid) return res.status(400).json({ error: "User UID is missing or invalid." });
 
-    const { name, email, role, phone, classId } = req.body;
+    const { name, email, role, phone, classId, rollNo } = req.body;
     let profilePhotoFile;
 
     if (!name || !role) {
@@ -52,6 +52,7 @@ const completeProfile = async (req, res) => {
       role,
       phone,
       classId,
+      rollNo,
     };
 
     if (profilePhotoFile) {
