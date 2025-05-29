@@ -13,6 +13,7 @@ const ProfileForm = () => {
     role: userProfile?.role || "STUDENT",
     phone: userProfile?.phone || "",
     classId: userProfile?.classId || "",
+    rollNo: userProfile?.rollNo || "",
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState("");
@@ -26,6 +27,7 @@ const ProfileForm = () => {
         role: userProfile.role || "STUDENT",
         phone: userProfile.phone || "",
         classId: userProfile.classId || "",
+        rollNo: userProfile.rollNo || "",
       });
     }
   }, [userProfile]);
@@ -56,6 +58,11 @@ const ProfileForm = () => {
       // Only append classId if the role is not 'FACULTY'
       if (formData.role !== "FACULTY" && formData.classId) {
         submitData.append("classId", formData.classId);
+      }
+
+      // Only append rollNo if the role is STUDENT or CR
+      if (formData.role === "STUDENT" || formData.role === "CR") {
+        submitData.append("rollNo", formData.rollNo);
       }
 
       // Only append photo if one was selected
@@ -175,6 +182,23 @@ const ProfileForm = () => {
               placeholder="Enter your class ID"
               className="w-full border border-gray-300 rounded-md p-3"
               value={formData.classId}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        )}
+
+        {/* Roll Number Input (Conditional) */}
+        {(formData.role === "STUDENT" || formData.role === "CR") && (
+          <div className="space-y-1">
+            <label htmlFor="rollNo" className="text-sm font-medium text-gray-700">Roll Number</label>
+            <input
+              id="rollNo"
+              name="rollNo"
+              type="text"
+              placeholder="Enter your roll number"
+              className="w-full border border-gray-300 rounded-md p-3"
+              value={formData.rollNo}
               onChange={handleChange}
               required
             />

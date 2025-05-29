@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaUserCircle, FaEnvelope, FaPhone, FaIdCard } from 'react-icons/fa';
 import { MdClass } from 'react-icons/md';
+import { IoSchool } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
 
 const ProfileField = ({ icon: Icon, label, value }) => (
@@ -81,6 +82,13 @@ const Profile = () => {
             label="Class ID" 
             value={user.classId} 
           />
+          {(user.role === 'STUDENT' || user.role === 'CR') && (
+            <ProfileField 
+              icon={IoSchool} 
+              label="Roll Number" 
+              value={user.rollNo} 
+            />
+          )}
           <ProfileField 
             icon={FaIdCard} 
             label="User ID" 
