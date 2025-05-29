@@ -51,7 +51,7 @@ const semesterSchema = new mongoose.Schema({
     ref: 'Course'
   }],
   classId: { 
-    type: mongoose.Schema.Types.ObjectId, 
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Class',
     required: true 
   },
