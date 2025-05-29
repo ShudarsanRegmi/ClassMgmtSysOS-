@@ -5,47 +5,98 @@ const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const fs = require('fs');
 
 const createClass = async (req, res) => {
-  console.log("Creating class...");
+  console.log("Creating class with data:", req.body);
 
   try {
-    const { name, classId, year, department, section } = req.body;
+    const { name, classId, batchId, year, department, section } = req.body;
 
-    let photoUrl = '';
-
-    if (req.file) {
-      const result = await uploadToCloudinary(req.file.path, 'class_photos');
-      photoUrl = result.secure_url;
-
-      fs.unlinkSync(req.file.path); // delete temp file
+    // Validate required fields
+    if (!name || !classId || !batchId || !year || !department || !section) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        required: ['name', 'classId', 'batchId', 'year', 'department', 'section']
+      });
     }
 
+    // Validate year is between 1 and 4
+    const yearNum = parseInt(year);
+    if (isNaN(yearNum) || yearNum < 1 || yearNum > 4) {
+      return res.status(400).json({ error: 'Year must be between 1 and 4' });
+    }
+
+    // Process photo if provided
+    let photoUrl = '';
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.path, 'class_photos');
+        photoUrl = result.secure_url;
+        // Clean up the temporary file
+        fs.unlinkSync(req.file.path);
+      } catch (uploadError) {
+        console.error("Error uploading to Cloudinary:", uploadError);
+        return res.status(500).json({ error: 'Failed to upload photo' });
+      }
+    }
+
+    // Check if class with same ID already exists
+    const existingClass = await Class.findOne({ classId: classId.toUpperCase() });
+    if (existingClass) {
+      return res.status(400).json({ error: 'Class with this ID already exists' });
+    }
+
+    // Check for unique combination of department, year, and section
+    const existingClassCombo = await Class.findOne({
+      department: department.toUpperCase(),
+      year: yearNum,
+      section: section.toUpperCase()
+    });
+
+    if (existingClassCombo) {
+      return res.status(400).json({ 
+        error: 'A class with this department, year, and section combination already exists' 
+      });
+    }
+
+    // Create new class with proper data transformation
     const newClass = new Class({
-      name,
-      classId,
-      year,
-      department,
-      section,
+      name: name.trim(),
+      classId: classId.toUpperCase(),
+      batchId: batchId.trim(),
+      year: yearNum,
+      department: department.toUpperCase(),
+      section: section.toUpperCase(),
       photoUrl,
       crs: [],
       cas: [],
       students: [],
+      isActive: true
     });
 
     await newClass.save();
-    res.status(201).json({ message: 'Class created successfully', class: newClass });
+
+    res.status(201).json({ 
+      message: 'Class created successfully', 
+      class: newClass 
+    });
 
   } catch (error) {
     console.error("Error creating class:", error);
-    res.status(500).json({ error: 'Failed to create class' });
+    res.status(500).json({ 
+      error: 'Failed to create class',
+      details: error.message 
+    });
   }
 };
 
 const getAllClasses = async (req, res) => {
   try {
-    const classes = await Class.find();
+    const classes = await Class.find()
+      .populate('crs', 'name email photoUrl')
+      .populate('cas', 'name email photoUrl')
+      .populate('currentSemester');
     res.status(200).json(classes);
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching classes:", error);
     res.status(500).json({ error: 'Failed to fetch classes' });
   }
 };
@@ -54,15 +105,20 @@ const deleteClassById = async (req, res) => {
   try {
     const { classId } = req.params;
 
-    const deletedClass = await Class.findOneAndDelete({ classId });
+    const deletedClass = await Class.findOneAndDelete({ 
+      classId: classId.toUpperCase() 
+    });
 
     if (!deletedClass) {
       return res.status(404).json({ error: 'Class not found' });
     }
 
-    res.status(200).json({ message: 'Class deleted successfully', class: deletedClass });
+    res.status(200).json({ 
+      message: 'Class deleted successfully', 
+      class: deletedClass 
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error deleting class:", error);
     res.status(500).json({ error: 'Failed to delete class' });
   }
 };
@@ -76,11 +132,11 @@ const fetchClassHomepage = async (req, res) => {
       return res.status(404).json({ error: 'User or class not found' });
     }
 
-    console.log("classId = " + user.classId);
+    console.log("Looking for class with ID:", user.classId);
 
-    // const classInfo = await Class.findOne({ classId: user.classId }).populate('crs');
-    const classInfo = await Class.findOne({ classId: user.classId.toString() }).populate('crs');
-
+    const classInfo = await Class.findOne({ 
+      classId: user.classId.toString().toUpperCase() 
+    }).populate('crs');
     
     if (!classInfo) {
       return res.status(404).json({ error: 'Class not found' });
@@ -91,24 +147,29 @@ const fetchClassHomepage = async (req, res) => {
       crs: classInfo.crs,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching class homepage:", err);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
 
 const fetchPaginatedStudents = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const { classId } = req.params;
 
-    const students = await User.find({ classId, role: 'student' })
+    const students = await User.find({ 
+      classId: classId.toUpperCase(), 
+      role: 'STUDENT' 
+    })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .select('name email photoUrl')
       .populate('photoUrl');
 
-    const count = await User.countDocuments({ classId, role: 'student' });
+    const count = await User.countDocuments({ 
+      classId: classId.toUpperCase(), 
+      role: 'STUDENT' 
+    });
 
     return res.status(200).json({
       students,
@@ -116,35 +177,45 @@ const fetchPaginatedStudents = async (req, res) => {
       currentPage: parseInt(page),
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching paginated students:", err);
     return res.status(500).json({ error: 'Failed to fetch students' });
   }
 }
 
-
 const getClassDetails = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const classData = await Class.findOne({ classId });
+    const classData = await Class.findOne({ 
+      classId: classId.toUpperCase() 
+    });
 
     if (!classData) {
       return res.status(404).json({ message: 'Class not found' });
     }
 
-    // Send relevant details as a response
     const classDetails = {
       name: classData.name,
       classId: classData.classId,
+      batchId: classData.batchId,
       year: classData.year,
       department: classData.department,
       section: classData.section,
-      photoUrl: classData.photoUrl
+      photoUrl: classData.photoUrl,
+      isActive: classData.isActive
     };
 
     res.status(200).json(classDetails);
   } catch (error) {
+    console.error("Error fetching class details:", error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-module.exports = {createClass, getAllClasses, deleteClassById, fetchClassHomepage, fetchPaginatedStudents, getClassDetails};
+module.exports = {
+  createClass, 
+  getAllClasses, 
+  deleteClassById, 
+  fetchClassHomepage, 
+  fetchPaginatedStudents, 
+  getClassDetails
+};
