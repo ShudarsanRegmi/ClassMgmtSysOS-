@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import PropTypes from 'prop-types';
 import { FaUserCircle, FaEnvelope, FaPhone, FaGraduationCap } from 'react-icons/fa';
 
@@ -14,7 +14,7 @@ const StudentList = ({ classId }) => {
     try {
       setLoading(true);
       setError('');
-      const response = await axios.get(`http://localhost:3001/api/class/${classId}/students?page=${page}&limit=9`);
+      const response = await api.get(`/class/${classId}/students?page=${page}&limit=12`);
       setStudents(response.data.students);
       setTotalPages(response.data.totalPages);
       setCurrentPage(response.data.currentPage);
@@ -34,103 +34,101 @@ const StudentList = ({ classId }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="flex justify-center items-center h-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   const renderStudentCard = (student) => (
     <div key={student._id} 
-         className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div className="relative pb-48">
+         className="bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-300 flex items-center p-3 gap-3">
+      <div className="flex-shrink-0 w-12 h-12 relative rounded-full overflow-hidden">
         {student.profile?.photoUrl?.url ? (
           <img
             src={student.profile.photoUrl.url}
             alt={student.name}
-            className="absolute h-full w-full object-cover object-center"
+            className="h-full w-full object-cover"
             onError={(e) => {
-              e.target.onerror = null; // Prevent infinite loop
-              e.target.src = ''; // Clear the src
-              e.target.parentElement.innerHTML = '<div class="absolute inset-0 bg-gray-100 flex items-center justify-center"><svg class="h-24 w-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></div>';
+              e.target.onerror = null;
+              e.target.src = '';
+              e.target.parentElement.innerHTML = '<div class="h-full w-full bg-gray-100 flex items-center justify-center"><svg class="h-8 w-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></div>';
             }}
           />
         ) : (
-          <div className="absolute h-full w-full bg-gray-100 flex items-center justify-center">
-            <FaUserCircle className="h-24 w-24 text-gray-400" />
+          <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+            <FaUserCircle className="h-8 w-8 text-gray-400" />
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">{student.name}</h3>
-        <div className="space-y-2">
-          <div className="flex items-center text-gray-600">
-            <FaEnvelope className="h-4 w-4 mr-2" />
-            <span className="text-sm truncate">{student.email}</span>
+      <div className="flex-grow min-w-0">
+        <h3 className="text-sm font-semibold text-gray-800 truncate">{student.name}</h3>
+        <div className="text-xs text-gray-600 space-y-1">
+          <div className="flex items-center gap-1">
+            <FaEnvelope className="h-3 w-3" />
+            <span className="truncate">{student.email}</span>
           </div>
           {student.phone && (
-            <div className="flex items-center text-gray-600">
-              <FaPhone className="h-4 w-4 mr-2" />
-              <span className="text-sm">{student.phone}</span>
+            <div className="flex items-center gap-1">
+              <FaPhone className="h-3 w-3" />
+              <span>{student.phone}</span>
             </div>
           )}
-          <div className="flex items-center text-gray-600">
-            <FaGraduationCap className="h-4 w-4 mr-2" />
-            <span className="text-sm">Roll: {student.rollNumber || 'N/A'}</span>
+          <div className="flex items-center gap-1">
+            <FaGraduationCap className="h-3 w-3" />
+            <span>Roll: {student.rollNumber || 'N/A'}</span>
           </div>
         </div>
       </div>
-      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-        <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center">
-          <span>View Details</span>
-        </button>
-      </div>
+      <button className="flex-shrink-0 text-xs bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-300">
+        Details
+      </button>
     </div>
   );
 
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Students</h2>
-        <div className="text-gray-600">
+    <div className="mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Students</h2>
+        <div className="text-sm text-gray-600">
           Total Students: {students.length}
         </div>
       </div>
 
       {error ? (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-          <p>{error}</p>
+          <p className="text-sm">{error}</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {students.map(renderStudentCard)}
           </div>
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8">
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <div className="flex justify-center mt-6">
+              <nav className="inline-flex rounded-md shadow-sm -space-x-px text-sm" aria-label="Pagination">
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`relative inline-flex items-center px-4 py-2 rounded-l-md border ${
+                  className={`relative inline-flex items-center px-3 py-1 rounded-l-md border ${
                     currentPage === 1
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       : 'bg-white text-gray-700 hover:bg-blue-50'
-                  } text-sm font-medium`}
+                  } text-sm`}
                 >
                   Previous
                 </button>
-                <span className="relative inline-flex items-center px-4 py-2 border-t border-b bg-white text-sm font-medium text-gray-700">
-                  Page {currentPage} of {totalPages}
+                <span className="relative inline-flex items-center px-3 py-1 border-t border-b bg-white text-sm text-gray-700">
+                  {currentPage} / {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className={`relative inline-flex items-center px-4 py-2 rounded-r-md border ${
+                  className={`relative inline-flex items-center px-3 py-1 rounded-r-md border ${
                     currentPage === totalPages
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       : 'bg-white text-gray-700 hover:bg-blue-50'
-                  } text-sm font-medium`}
+                  } text-sm`}
                 >
                   Next
                 </button>
