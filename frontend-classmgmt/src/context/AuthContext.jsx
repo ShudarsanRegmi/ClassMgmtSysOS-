@@ -51,6 +51,71 @@ export const AuthProvider = ({ children }) => {
     const [currentSemester, setCurrentSemester] = useState(null);
     const [availableSemesters, setAvailableSemesters] = useState([]);
 
+    // Global semester state management
+    const setActiveSemester = (semesterId) => {
+        const semester = availableSemesters.find(sem => 
+            sem.id === semesterId || sem._id === semesterId
+        );
+        if (semester) {
+            setCurrentSemester(semester);
+            // Store in localStorage instead of sessionStorage for persistence
+            localStorage.setItem('currentSemesterId', semester.id || semester._id);
+            // Dispatch custom event for cross-component communication
+            window.dispatchEvent(new CustomEvent('semesterChanged', { 
+                detail: { semester } 
+            }));
+        }
+    };
+
+    // Get current semester info with additional helper methods
+    const getSemesterInfo = () => ({
+        ...currentSemester,
+        isActive: true, // You can add more complex logic here
+        formattedDates: currentSemester ? {
+            start: new Date(currentSemester.startDate).toLocaleDateString(),
+            end: new Date(currentSemester.endDate).toLocaleDateString()
+        } : null,
+        displayName: currentSemester ? `${currentSemester.name} (${currentSemester.code})` : '',
+    });
+
+    // Semester utility functions
+    const semesterUtils = {
+        getAvailableYears: () => [...new Set(availableSemesters.map(sem => sem.year))],
+        getSemestersByYear: (year) => availableSemesters.filter(sem => sem.year === year),
+        findSemesterById: (id) => availableSemesters.find(sem => sem.id === id || sem._id === id),
+        getCurrentSemesterCourses: () => currentSemester?.courses || []
+    };
+
+    // Restore semester from localStorage on mount and when availableSemesters changes
+    useEffect(() => {
+        const storedSemesterId = localStorage.getItem('currentSemesterId');
+        if (storedSemesterId && availableSemesters.length > 0) {
+            const semester = availableSemesters.find(sem => 
+                sem.id === storedSemesterId || sem._id === storedSemesterId
+            );
+            if (semester) {
+                setCurrentSemester(semester);
+            }
+        }
+    }, [availableSemesters]);
+
+    // Listen for semester changes from other parts of the app
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'currentSemesterId' && e.newValue) {
+                const semester = availableSemesters.find(sem => 
+                    sem.id === e.newValue || sem._id === e.newValue
+                );
+                if (semester) {
+                    setCurrentSemester(semester);
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [availableSemesters]);
+
     // Fetch class details including current semester
     const fetchClassDetails = async (classId) => {
         if (!classId) return null;
@@ -65,13 +130,26 @@ export const AuthProvider = ({ children }) => {
             // Set available semesters
             setAvailableSemesters(semesters);
 
-            // Set current semester if available
+            // Check session storage first for current semester
+            const storedSemesterId = sessionStorage.getItem('currentSemesterId');
+            if (storedSemesterId) {
+                const storedSemester = semesters.find(sem => 
+                    sem.id === storedSemesterId || sem._id === storedSemesterId
+                );
+                if (storedSemester) {
+                    setCurrentSemester(storedSemester);
+                    return classData;
+                }
+            }
+
+            // If no stored semester, use the one from class data
             if (classData.currentSemester) {
                 const currentSem = semesters.find(
                     sem => sem.id === classData.currentSemester.id || sem._id === classData.currentSemester._id
                 );
                 if (currentSem) {
                     setCurrentSemester(currentSem);
+                    sessionStorage.setItem('currentSemesterId', currentSem.id || currentSem._id);
                 }
             }
 
@@ -274,19 +352,12 @@ export const AuthProvider = ({ children }) => {
         isStudent: hasRole('STUDENT'),
         hasRole,
         
-        // Semester information
+        // Enhanced semester information and management
         currentSemester,
         availableSemesters,
-        semesterInfo: currentSemester ? {
-            id: currentSemester.id || currentSemester._id,
-            name: currentSemester.name,
-            code: currentSemester.semcode,
-            year: currentSemester.year,
-            startDate: currentSemester.startDate,
-            endDate: currentSemester.endDate,
-            status: currentSemester.status,
-            courses: currentSemester.courses || []
-        } : null,
+        setActiveSemester,
+        semesterInfo: getSemesterInfo(),
+        ...semesterUtils,
         
         // Functions
         refreshUserProfile,
