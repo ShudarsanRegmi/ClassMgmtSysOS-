@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import StudentList from './StudentList';
 import CRList from './CRList';
 import { useAuth } from '../../context/AuthContext';
@@ -19,7 +19,7 @@ const ClassHomepage = () => {
 
     const fetchClassDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/class/${classId}/details`);
+        const response = await api.get(`/class/${classId}/details`);
         setPhotoUrl(response.data.photoUrl);
         setError('');
       } catch (error) {
@@ -58,8 +58,8 @@ const ClassHomepage = () => {
       {photoUrl && (
         <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover mb-4" />
       )}
-      <StudentList classId={classId} />
       <CRList classId={classId} />
+      <StudentList classId={classId} />
       <footer className="mt-8 text-center text-gray-500">
         &copy; {new Date().getFullYear()} Class Management System
       </footer>
