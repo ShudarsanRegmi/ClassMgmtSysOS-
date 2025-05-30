@@ -196,7 +196,6 @@ const getUserByUid = async (req, res) => {
 };
 
 
-
 //  for paginated fetching
 const getStudentsByClass = async (req, res) => {
   try {
@@ -204,11 +203,23 @@ const getStudentsByClass = async (req, res) => {
     console.log('fetching.. ' + classId)
     const { page = 1, limit = 10 } = req.query;
 
-    const students = await User.find({ classId, role: 'student' })
+    const students = await User.find({ 
+      classId, 
+      $or: [
+        { role: 'STUDENT' },
+        { role: 'CR' }
+      ]
+    })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
 
-    const total = await User.countDocuments({ classId, role: 'student' });
+    const total = await User.countDocuments({ 
+      classId,
+      $or: [
+        { role: 'STUDENT' },
+        { role: 'CR' }
+      ]
+    });
 
     res.status(200).json({
       students,
