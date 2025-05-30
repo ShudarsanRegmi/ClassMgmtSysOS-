@@ -26,6 +26,6 @@ router.get('students/:classId', classController.fetchPaginatedStudents);
 router.get('/:classId/details', classController.getClassDetails);
 
 // Update current semester for a class
-// router.put('/:classId/current-semester', verifyToken, classController.updateCurrentSemester);
+router.put('/:classId/current-semester', verifyToken, classController.updateCurrentSemester);
 
 module.exports = router;

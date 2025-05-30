@@ -125,7 +125,13 @@ const createSemester = async (req, res) => {
 // Get all semesters for a class
 const getSemestersByClass = async (req, res) => {
   try {
-    const { classId } = req.params; // This is the business ID from URL
+    const { classId } = req.params;
+
+    if (!classId) {
+      return res.status(400).json({ 
+        message: 'Class ID is required' 
+      });
+    }
 
     // Find the class using business ID
     const classDoc = await Class.findOne({ 
@@ -138,57 +144,36 @@ const getSemestersByClass = async (req, res) => {
       });
     }
 
-    // Find semesters using class's MongoDB _id
+    // Find all semesters for this class
     const semesters = await Semester.find({ 
       classId: classDoc._id 
     })
-    .populate([
-      {
-        path: 'classId',
-        select: 'name classId department section year -_id'
-      },
-      {
-        path: 'createdBy',
-        select: 'name email -_id'
-      },
-      {
-        path: 'courses',
-        select: 'name code credits -_id'
-      }
-    ])
-    .sort({ createdAt: -1 });
+    .select('_id name semcode year startDate endDate status courses')
+    .sort({ year: 1, semcode: 1 }) // Sort by year and semester code
+    .lean(); // Convert to plain JavaScript objects for better performance
 
-    // Transform response to use business IDs
-    const response = semesters.map(semester => ({
-      id: semester._id,
-      name: semester.name,
-      semcode: semester.semcode,
-      year: semester.year,
-      startDate: semester.startDate,
-      endDate: semester.endDate,
-      status: semester.status,
-      class: {
-        classId: semester.classId.classId,
-        name: semester.classId.name,
-        department: semester.classId.department,
-        section: semester.classId.section,
-        year: semester.classId.year
-      },
-      courses: semester.courses.map(course => ({
-        code: course.code,
-        name: course.name,
-        credits: course.credits
-      })),
-      createdBy: {
-        name: semester.createdBy.name,
-        email: semester.createdBy.email
-      }
-    }));
+    // Simple response with just the semester data
+    res.json({ 
+      classId: classId.toUpperCase(),
+      totalSemesters: semesters.length,
+      semesters: semesters.map(sem => ({
+        id: sem._id,
+        name: sem.name,
+        code: sem.semcode,
+        year: sem.year,
+        startDate: sem.startDate,
+        endDate: sem.endDate,
+        status: sem.status,
+        courses: sem.courses || []
+      }))
+    });
 
-    res.json({ semesters: response });
   } catch (error) {
     console.error('Get semesters error:', error);
-    res.status(500).json({ message: 'Error fetching semesters' });
+    res.status(500).json({ 
+      message: 'Error fetching semesters',
+      error: error.message 
+    });
   }
 };
 
@@ -196,7 +181,8 @@ const getSemestersByClass = async (req, res) => {
 const getSemester = async (req, res) => {
   try {
     const { id } = req.params; // This should be MongoDB _id for direct lookup
-
+    console.log("-----------got the request......");
+    console.log("id", id);
     const semester = await Semester.findById(id)
       .populate([
         {
