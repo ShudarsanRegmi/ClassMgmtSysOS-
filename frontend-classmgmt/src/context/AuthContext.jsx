@@ -48,6 +48,54 @@ export const AuthProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentSemester, setCurrentSemester] = useState(null);
+    const [availableSemesters, setAvailableSemesters] = useState([]);
+
+    // Fetch class details including current semester
+    const fetchClassDetails = async (classId) => {
+        if (!classId) return null;
+        try {
+            const response = await api.get(`/class/${classId}/details`);
+            const classData = response.data;
+            
+            // Fetch available semesters for the class
+            const semestersResponse = await api.get(`/sem/class/${classId}`);
+            const semesters = semestersResponse.data.semesters;
+            
+            // Set available semesters
+            setAvailableSemesters(semesters);
+
+            // Set current semester if available
+            if (classData.currentSemester) {
+                const currentSem = semesters.find(
+                    sem => sem.id === classData.currentSemester.id || sem._id === classData.currentSemester._id
+                );
+                if (currentSem) {
+                    setCurrentSemester(currentSem);
+                }
+            }
+
+            return classData;
+        } catch (err) {
+            console.error('Error fetching class details:', err);
+            return null;
+        }
+    };
+
+    // Add helper functions for semester operations
+    const isSemesterActive = (semester) => {
+        if (!semester) return false;
+        const now = new Date();
+        return semester.dates.start <= now && now <= semester.dates.end;
+    };
+
+    const getSemesterStatus = (semester) => {
+        if (!semester) return 'UNKNOWN';
+        const now = new Date();
+        if (now < semester.dates.start) return 'UPCOMING';
+        if (now > semester.dates.end) return 'COMPLETED';
+        return 'ONGOING';
+    };
 
     // Fetch user profile from MongoDB
     const fetchUserProfile = async (user) => {
@@ -55,28 +103,33 @@ export const AuthProvider = ({ children }) => {
         
         try {
             const response = await api.get('/profile');
-            console.log('Profile Response:', response.data);
+            // console.log('Profile Response:', response.data);
             const mongoProfile = response.data.user;
             
             // Merge Firebase and MongoDB data
             const mergedProfile = mergeProfileData(user, mongoProfile);
 
+            // If user has a classId, fetch class details
+            if (mergedProfile?.classId) {
+                await fetchClassDetails(mergedProfile.classId);
+            }
+
             // Log detailed auth and profile information
-            console.group('🔐 Auth Details');
-            console.log('Firebase User:', extractUserDetails(user));
-            console.log('MongoDB Profile:', mongoProfile);
-            console.log('Merged Profile:', mergedProfile);
-            console.log('Auth State:', {
-                isAuthenticated: !!user,
-                hasProfile: !!mergedProfile,
-                roles: mergedProfile?.role || [],
-                permissions: {
-                    isAdmin: mergedProfile?.role === 'ADMIN',
-                    isFaculty: mergedProfile?.role === 'FACULTY',
-                    isStudent: mergedProfile?.role === 'STUDENT'
-                }
-            });
-            console.groupEnd();
+            // console.group('🔐 Auth Details');
+            // console.log('Firebase User:', extractUserDetails(user));
+            // console.log('MongoDB Profile:', mongoProfile);
+            // console.log('Merged Profile:', mergedProfile);
+            // console.log('Auth State:', {
+            //     isAuthenticated: !!user,
+            //     hasProfile: !!mergedProfile,
+            //     roles: mergedProfile?.role || [],
+            //     permissions: {
+            //         isAdmin: mergedProfile?.role === 'ADMIN',
+            //         isFaculty: mergedProfile?.role === 'FACULTY',
+            //         isStudent: mergedProfile?.role === 'STUDENT'
+            //     }
+            // });
+            // console.groupEnd();
 
             return mergedProfile;
         } catch (err) {
@@ -86,9 +139,30 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Update current semester
+    const updateCurrentSemester = async (semesterId) => {
+        if (!userProfile?.classId) return;
+
+        try {
+            await api.put(`/class/${userProfile.classId}/current-semester`, {
+                semesterId
+            });
+            setCurrentSemester(semesterId);
+            
+            // Log semester update
+            console.group('📚 Semester Updated');
+            console.log('New Semester:', semesterId);
+            console.log('Update Timestamp:', new Date().toISOString());
+            console.groupEnd();
+        } catch (err) {
+            console.error('Error updating current semester:', err);
+            throw err;
+        }
+    };
+
     useEffect(() => {
         const auth = getAuth();
-        console.log('Auth:', auth);
+        // console.log('Auth:', auth);
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
@@ -98,13 +172,13 @@ export const AuthProvider = ({ children }) => {
                     setUserProfile(profile);
 
                     // Log auth state changes
-                    console.group('🔄 Auth State Changed');
-                    console.log('User Signed In:', {
-                        timestamp: new Date().toISOString(),
-                        user: extractUserDetails(user),
-                        profile: profile
-                    });
-                    console.groupEnd();
+                    // console.group('🔄 Auth State Changed');
+                    // console.log('User Signed In:', {
+                    //     timestamp: new Date().toISOString(),
+                    //     user: extractUserDetails(user),
+                    //     profile: profile
+                    // });
+                    // console.groupEnd();
                 } else {
                     setCurrentUser(null);
                     setUserProfile(null);
@@ -162,47 +236,106 @@ export const AuthProvider = ({ children }) => {
 
     // Log whenever auth state or profile changes
     useEffect(() => {
-        console.group('🔑 Auth State Update');
-        console.log('Current State:', {
-            timestamp: new Date().toISOString(),
-            isAuthenticated: !!currentUser,
-            hasProfile: !!userProfile,
-            user: extractUserDetails(currentUser),
-            profile: userProfile,
-            roles: {
-                isAdmin: hasRole('ADMIN'),
-                isFaculty: hasRole('FACULTY'),
-                isStudent: hasRole('STUDENT')
-            }
-        });
-        console.groupEnd();
+        // console.group('🔑 Auth State Update');
+        // console.log('Current State:', {
+        //     timestamp: new Date().toISOString(),
+        //     isAuthenticated: !!currentUser,
+        //     hasProfile: !!userProfile,
+        //     user: extractUserDetails(currentUser),
+        //     profile: userProfile,
+        //     roles: {
+        //         isAdmin: hasRole('ADMIN'),
+        //         isFaculty: hasRole('FACULTY'),
+        //         isStudent: hasRole('STUDENT')
+        //     }
+        // });
+        // console.groupEnd();
     }, [currentUser, userProfile]);
 
     const value = {
+        // User-related information
         currentUser,          // Firebase user object
         userProfile,          // Merged MongoDB profile with Firebase data
-        loading,
-        error,
-        refreshUserProfile,   // Function to manually refresh profile
-        updateUserProfile,    // Function to update profile
-        
-        // Role-based checks
-        isAdmin: hasRole('ADMIN'),
-        isFaculty: hasRole('FACULTY'),
-        isStudent: hasRole('STUDENT'),
-        hasRole,             // Function to check custom roles
-        
-        // Commonly used user properties
         userId: userProfile?.uid || currentUser?.uid,
-        userEmail: currentUser?.email,  // Always use Firebase email
+        userEmail: currentUser?.email,
         userName: userProfile?.name,
         userRole: userProfile?.role,
         classId: userProfile?.classId,
         
         // Auth state
+        loading,
+        error,
         isAuthenticated: !!currentUser,
         isProfileComplete: !!userProfile,
+        
+        // Role-based checks
+        isAdmin: hasRole('ADMIN'),
+        isFaculty: hasRole('FACULTY'),
+        isStudent: hasRole('STUDENT'),
+        hasRole,
+        
+        // Semester information
+        currentSemester,
+        availableSemesters,
+        semesterInfo: currentSemester ? {
+            id: currentSemester.id || currentSemester._id,
+            name: currentSemester.name,
+            code: currentSemester.semcode,
+            year: currentSemester.year,
+            startDate: currentSemester.startDate,
+            endDate: currentSemester.endDate,
+            status: currentSemester.status,
+            courses: currentSemester.courses || []
+        } : null,
+        
+        // Functions
+        refreshUserProfile,
+        updateUserProfile,
+        updateCurrentSemester
     };
+
+    // Log the actual context value object
+    console.group('🔄 Auth Context Value (Exported)');
+    console.log('Context Value:', value);
+    console.groupEnd();
+
+    // Log the complete combined object
+    // console.group('📚 Complete Auth Context');
+    // console.log('Combined State:', {
+    //     // User & Auth
+    //     user: {
+    //         id: value.userId,
+    //         email: value.userEmail,
+    //         name: value.userName,
+    //         role: value.userRole,
+    //         classId: value.classId,
+    //         isAuthenticated: value.isAuthenticated,
+    //         isProfileComplete: value.isProfileComplete,
+    //         permissions: {
+    //             isAdmin: value.isAdmin,
+    //             isFaculty: value.isFaculty,
+    //             isStudent: value.isStudent
+    //         }
+    //     },
+    //     // Profile Details
+    //     profile: value.userProfile,
+    //     // Firebase Details
+    //     firebase: extractUserDetails(value.currentUser),
+    //     // Semester Information
+    //     semester: {
+    //         current: value.semesterInfo,
+    //         available: value.availableSemesters,
+    //         hasSemester: !!value.currentSemester,
+    //         totalSemesters: value.availableSemesters?.length || 0
+    //     },
+    //     // System State
+    //     system: {
+    //         loading: value.loading,
+    //         error: value.error,
+    //         timestamp: new Date().toISOString()
+    //     }
+    // });
+    // console.groupEnd();
 
     return (
         <AuthContext.Provider value={value}>

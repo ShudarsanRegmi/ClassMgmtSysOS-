@@ -67,12 +67,10 @@ const createSemester = async (req, res) => {
 
     await semester.save();
 
-    // Update class's current semester if it's not set
-    if (!classDoc.currentSemester) {
-      await Class.findByIdAndUpdate(classDoc._id, {
-        currentSemester: semester._id
-      }, { new: true });
-    }
+    // Always update the class's current semester to the newly created one
+    await Class.findByIdAndUpdate(classDoc._id, {
+      currentSemester: semester._id
+    }, { new: true });
 
     // Populate and return the response with necessary fields
     const populatedSemester = await semester.populate([
@@ -95,6 +93,7 @@ const createSemester = async (req, res) => {
       startDate: populatedSemester.startDate,
       endDate: populatedSemester.endDate,
       status: populatedSemester.status,
+      isCurrentSemester: true, // This semester is now the current one
       class: {
         classId: populatedSemester.classId.classId,
         name: populatedSemester.classId.name,
@@ -105,12 +104,12 @@ const createSemester = async (req, res) => {
       createdBy: {
         name: populatedSemester.createdBy.name,
         email: populatedSemester.createdBy.email,
-        uid: populatedSemester.createdBy.uid  // Include Firebase UID in response
+        uid: populatedSemester.createdBy.uid
       }
     };
 
     res.status(201).json({
-      message: 'Semester created successfully',
+      message: 'Semester created successfully and set as current semester',
       semester: response
     });
 

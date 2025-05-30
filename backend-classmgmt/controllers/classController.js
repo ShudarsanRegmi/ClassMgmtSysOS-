@@ -3,6 +3,7 @@ const Class = require('../models/Class');
 const User = require('../models/User');
 const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const fs = require('fs');
+const Semester = require('../models/Semester');
 
 const createClass = async (req, res) => {
   console.log("Creating class with data:", req.body);
@@ -188,7 +189,7 @@ const getClassDetails = async (req, res) => {
     const classId = req.params.classId;
     const classData = await Class.findOne({ 
       classId: classId.toUpperCase() 
-    });
+    }).populate('currentSemester');
 
     if (!classData) {
       return res.status(404).json({ message: 'Class not found' });
@@ -202,7 +203,8 @@ const getClassDetails = async (req, res) => {
       department: classData.department,
       section: classData.section,
       photoUrl: classData.photoUrl,
-      isActive: classData.isActive
+      isActive: classData.isActive,
+      currentSemester: classData.currentSemester
     };
 
     res.status(200).json(classDetails);
@@ -212,11 +214,51 @@ const getClassDetails = async (req, res) => {
   }
 };
 
+const updateCurrentSemester = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { semesterId } = req.body;
+
+    // Validate request body
+    if (!semesterId) {
+      return res.status(400).json({ error: 'semesterId is required' });
+    }
+
+    // Find the class
+    const classData = await Class.findOne({ classId: classId.toUpperCase() });
+    if (!classData) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    // Verify the semester exists and belongs to this class
+    const semester = await Semester.findOne({
+      _id: semesterId,
+      classId: classId.toUpperCase()
+    });
+    if (!semester) {
+      return res.status(404).json({ error: 'Semester not found or does not belong to this class' });
+    }
+
+    // Update the class's current semester
+    classData.currentSemester = semesterId;
+    await classData.save();
+
+    res.status(200).json({
+      message: 'Current semester updated successfully',
+      currentSemester: semester
+    });
+  } catch (error) {
+    console.error("Error updating current semester:", error);
+    res.status(500).json({ error: 'Failed to update current semester' });
+  }
+};
+
 module.exports = {
   createClass, 
   getAllClasses, 
   deleteClassById, 
   fetchClassHomepage, 
   fetchPaginatedStudents, 
-  getClassDetails
+  getClassDetails,
+  updateCurrentSemester
 };
