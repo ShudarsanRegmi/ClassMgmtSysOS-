@@ -153,6 +153,7 @@ const fetchClassHomepage = async (req, res) => {
 }
 
 const fetchPaginatedStudents = async (req, res) => {
+  console.log("Fetching paginated students");
   try {
     const { page = 1, limit = 10 } = req.query;
     const { classId } = req.params;
