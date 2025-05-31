@@ -16,6 +16,7 @@ import ClassHomepage from "./pages/Class/ClassHomepage";
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateFaculty from "./pages/Faculties/CreateFaculty";
 import CreateCourse from "./pages/Courses/CreateCourse";
+import SemesterCourses from "./pages/Courses/SemesterCourses";
 import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
 import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import NoticeBoard from './components/NoticeBoard';
@@ -94,6 +95,12 @@ function App() {
             <Route path="/courses/create" element={
               <PrivateRoute>
                 <CreateCourse />
+              </PrivateRoute>
+            } />
+
+            <Route path="/courses/semester" element={
+              <PrivateRoute>
+                <SemesterCourses />
               </PrivateRoute>
             } />
 
