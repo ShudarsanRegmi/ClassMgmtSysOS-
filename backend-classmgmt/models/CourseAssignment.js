@@ -9,7 +9,7 @@ const courseAssignmentSchema = new Schema({
   },
   faculty: {
     type: Schema.Types.ObjectId,
-    ref: 'Faculty',
+    ref: 'User',
     required: true
   },
   class: {
@@ -41,5 +41,11 @@ const courseAssignmentSchema = new Schema({
 }, {
   timestamps: true // adds createdAt and updatedAt automatically
 });
+
+// Add compound index to prevent duplicate assignments
+courseAssignmentSchema.index(
+  { course: 1, faculty: 1, class: 1, semester: 1 }, 
+  { unique: true }
+);
 
 module.exports = mongoose.model('CourseAssignment', courseAssignmentSchema);
