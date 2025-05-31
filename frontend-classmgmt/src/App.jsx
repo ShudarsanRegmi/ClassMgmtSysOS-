@@ -41,13 +41,27 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/logout" element={<Logout />} />
             
-            {/* Protected Routes */}
-            <Route path='/dashboard' element={
+            {/* Dashboard and its nested routes */}
+            <Route path="/dashboard" element={
               <PrivateRoute>
                 <Dashboard />
               </PrivateRoute>
-            } />
+            }>
+              <Route index element={
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Default dashboard content/widgets */}
+                </div>
+              } />
+              <Route path="courses" element={<SemesterCourses />} />
+              <Route path="schedule" element={<div>Schedule Component</div>} />
+              <Route path="assignments" element={<div>Assignments Component</div>} />
+              <Route path="students" element={<div>Students Component</div>} />
+              <Route path="faculty" element={<div>Faculty Component</div>} />
+              <Route path="results" element={<div>Results Component</div>} />
+              <Route path="settings" element={<div>Settings Component</div>} />
+            </Route>
             
+            {/* Protected Routes */}
             <Route path='/profile' element={
               <PrivateRoute>
                 <Profile />
@@ -95,12 +109,6 @@ function App() {
             <Route path="/courses/create" element={
               <PrivateRoute>
                 <CreateCourse />
-              </PrivateRoute>
-            } />
-
-            <Route path="/courses/semester" element={
-              <PrivateRoute>
-                <SemesterCourses />
               </PrivateRoute>
             } />
 
