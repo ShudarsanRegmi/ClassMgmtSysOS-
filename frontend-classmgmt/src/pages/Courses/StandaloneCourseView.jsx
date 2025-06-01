@@ -114,15 +114,65 @@ const StandaloneCourseView = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'deadlines':
-        return <DeadlinesTab deadlines={materials?.deadlines} />;
+        return <DeadlinesTab 
+          deadlines={materials?.deadlines || []} 
+          courseId={courseId} 
+          semesterId={semesterId}
+          onDeadlineUpdate={(updatedDeadlines) => {
+            setMaterials(prev => ({
+              ...prev,
+              deadlines: updatedDeadlines
+            }));
+          }}
+        />;
       case 'syllabus':
-        return <SyllabusTab syllabus={materials?.syllabus} />;
+        return <SyllabusTab 
+          syllabus={materials?.syllabus}
+          courseId={courseId}
+          semesterId={semesterId}
+          onSyllabusUpdate={(updatedSyllabus) => {
+            setMaterials(prev => ({
+              ...prev,
+              syllabus: updatedSyllabus
+            }));
+          }}
+        />;
       case 'materials':
-        return <MaterialsTab materials={materials?.courseMaterials} />;
+        return <MaterialsTab 
+          materials={materials?.courseMaterials}
+          courseId={courseId}
+          semesterId={semesterId}
+          onMaterialUpdate={(updatedMaterials) => {
+            setMaterials(prev => ({
+              ...prev,
+              courseMaterials: updatedMaterials
+            }));
+          }}
+        />;
       case 'notes':
-        return <SharedNotesTab notes={materials?.notes} />;
+        return <SharedNotesTab 
+          notes={materials?.notes}
+          courseId={courseId}
+          semesterId={semesterId}
+          onNoteUpdate={(updatedNotes) => {
+            setMaterials(prev => ({
+              ...prev,
+              notes: updatedNotes
+            }));
+          }}
+        />;
       case 'whiteboard':
-        return <WhiteboardTab shots={materials?.whiteboardShots} />;
+        return <WhiteboardTab 
+          shots={materials?.whiteboardShots}
+          courseId={courseId}
+          semesterId={semesterId}
+          onShotUpdate={(updatedShots) => {
+            setMaterials(prev => ({
+              ...prev,
+              whiteboardShots: updatedShots
+            }));
+          }}
+        />;
       default:
         return null;
     }

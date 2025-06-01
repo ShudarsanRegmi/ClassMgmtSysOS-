@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
 const verifyToken = require('../middleware/authmiddleware');
+const upload = require('../middleware/fileUpload');
 const {
     getCourseMaterials,
     uploadMaterial,
@@ -23,8 +24,8 @@ router.get('/:courseId/semester/:semesterId', verifyToken, courseController.getC
 
 // Course Material Routes with semester context
 router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials);
-router.post('/:courseId/materials/:semesterId/:type', verifyToken, uploadMaterial);
-router.put('/:courseId/materials/:semesterId/:type/:id', verifyToken, updateMaterial);
+router.post('/:courseId/materials/:semesterId/:type', verifyToken, upload.single('file'), uploadMaterial);
+router.put('/:courseId/materials/:semesterId/:type/:id', verifyToken, upload.single('file'), updateMaterial);
 router.delete('/:courseId/materials/:semesterId/:type/:id', verifyToken, deleteMaterial);
 router.post('/:courseId/materials/:semesterId/notes/:id/like', verifyToken, toggleNoteLike);
 
