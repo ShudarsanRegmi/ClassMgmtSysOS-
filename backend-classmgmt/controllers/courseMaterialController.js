@@ -10,16 +10,8 @@ const Class = require('../models/Class');
 const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const fs = require('fs').promises;
 const path = require('path');
-
-// Helper function to handle errors
-const handleError = (res, error) => {
-    console.error('Error:', error);
-    res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: error.message
-    });
-};
+const { handleError } = require('../utils/errorHandler');
+const cloudinary = require('../utils/cloudinary');
 
 // Helper function to handle file upload
 const handleFileUpload = async (file, folder = 'classmgmt') => {
@@ -358,10 +350,42 @@ const toggleNoteLike = async (req, res) => {
     }
 };
 
+const getClassStudents = async (req, res) => {
+    try {
+        const { courseId, semesterId } = req.params;
+
+        // Find the class
+        const classData = await Class.findOne({ courseId, semesterId });
+        if (!classData) {
+            return res.status(404).json({
+                success: false,
+                message: 'Class not found'
+            });
+        }
+
+        // Get all students in the class
+        const students = await User.find(
+            { 
+                _id: { $in: classData.students },
+                userRole: 'STUDENT'
+            },
+            'name email photoUrl'
+        );
+
+        res.status(200).json({
+            success: true,
+            data: students
+        });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
 module.exports = {
     getCourseMaterials,
     uploadMaterial,
     updateMaterial,
     deleteMaterial,
-    toggleNoteLike
+    toggleNoteLike,
+    getClassStudents
 }; 

@@ -48,7 +48,6 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
     unit: '1'
   });
 
-  console.log("user....");
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleClickOpen = () => setOpen(true);
