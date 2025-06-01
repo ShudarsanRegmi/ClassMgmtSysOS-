@@ -11,6 +11,7 @@ const facultyRoutes = require('./routes/facultyRoutes');
 const settingsRoutes = require('./routes/systemSettingsRoutes');
 const assignmentRoutes = require('./routes/courseAssignment');
 const noticeRoutes = require('./routes/noticeRoutes');
+const courseMaterialRoutes = require('./routes/courseMaterialRoutes');
 const connectDB = require('./config/db');
 
 const swaggerUi = require("swagger-ui-express");
@@ -41,7 +42,7 @@ app.use('/api/class', classRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 app.use('/api/notices', noticeRoutes);  
-
+app.use('/api/materials', courseMaterialRoutes);
 
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);

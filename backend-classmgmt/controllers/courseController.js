@@ -3,6 +3,7 @@ const Faculty = require('../models/Faculties');
 const CourseAssignment = require('../models/CourseAssignment');
 const Class = require('../models/Class');
 const User = require('../models/User');
+const Semester = require('../models/Semester');
 
 // Create Course
 const createCourse = async (req, res) => {
@@ -75,13 +76,14 @@ const getSemesterCourses = async (req, res) => {
             class: classDetails._id,
             semester: semesterId
         })
-        .populate('course', 'code title credits') // Populate course details
-        .populate('faculty', 'name email photoUrl'); // Populate faculty details
+        .populate('course') // Populate course details
+        .populate('faculty', 'name email photoUrl'); // Populate faculty details from User model
 
         res.status(200).json({
             success: true,
             data: courseAssignments.map(assignment => ({
-                id: assignment.course._id,
+                id: assignment._id, // Use assignment ID instead of course ID
+                courseId: assignment.course._id, // Add course ID separately
                 code: assignment.course.code,
                 title: assignment.course.title,
                 credits: assignment.course.credits,
@@ -104,4 +106,78 @@ const getSemesterCourses = async (req, res) => {
     }
 };
 
-module.exports = { createCourse, getAllCourses, getSemesterCourses };
+// Get a single course by ID
+const getCourseById = async (req, res) => {
+    try {
+        const { courseId, semesterId } = req.params;
+        const { user } = req;
+
+        // Get user's class
+        const userDetails = await User.findOne({ uid: user.uid });
+        if (!userDetails) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get class details using classId string
+        const classDetails = await Class.findOne({ classId: userDetails.classId });
+        if (!classDetails) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+
+        // First get the course assignment for this specific semester
+        const courseAssignment = await CourseAssignment.findOne({
+            course: courseId,
+            semester: semesterId,
+            class: classDetails._id
+        })
+        .populate('course')
+        .populate('faculty', 'name email photoUrl');
+
+        if (!courseAssignment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Course assignment not found for this semester'
+            });
+        }
+
+        // Get the semester details
+        const semester = await Semester.findById(semesterId).select('name startDate endDate');
+
+        res.status(200).json({
+            success: true,
+            data: {
+                id: courseAssignment._id,
+                courseId: courseAssignment.course._id,
+                code: courseAssignment.course.code,
+                title: courseAssignment.course.title,
+                credits: courseAssignment.course.credits,
+                faculty: {
+                    name: courseAssignment.faculty.name,
+                    email: courseAssignment.faculty.email,
+                    photoUrl: courseAssignment.faculty.photoUrl
+                },
+                semester: {
+                    id: semester._id,
+                    name: semester.name,
+                    startDate: semester.startDate,
+                    endDate: semester.endDate
+                },
+                assignedAt: courseAssignment.assignedAt
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching course:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    createCourse,
+    getAllCourses,
+    getSemesterCourses,
+    getCourseById
+};
