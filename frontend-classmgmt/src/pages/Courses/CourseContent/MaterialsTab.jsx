@@ -31,14 +31,14 @@ import api from '../../../utils/api';
 const MATERIAL_TYPES = ['LECTURE_NOTE', 'PRESENTATION', 'REFERENCE', 'OTHER'];
 
 const getFileIcon = (fileType) => {
-  if (fileType.includes('pdf')) return <PictureAsPdf />;
-  if (fileType.includes('presentation') || fileType.includes('powerpoint')) return <Slideshow />;
-  if (fileType.includes('document') || fileType.includes('word')) return <Description />;
+  if (fileType?.includes('pdf')) return <PictureAsPdf />;
+  if (fileType?.includes('presentation') || fileType?.includes('powerpoint')) return <Slideshow />;
+  if (fileType?.includes('document') || fileType?.includes('word')) return <Description />;
   return <InsertDriveFile />;
 };
 
 const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }) => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,6 +47,8 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
     materialType: 'LECTURE_NOTE',
     unit: '1'
   });
+
+  console.log("user....");
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleClickOpen = () => setOpen(true);
@@ -59,6 +61,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
       unit: '1'
     });
     setSelectedFile(null);
+    setLoading(false);
   };
 
   const handleFileChange = (event) => {
@@ -92,12 +95,22 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
       );
 
       if (onMaterialUpdate) {
-        onMaterialUpdate(response.data.data);
+        const newMaterial = response.data.data;
+        onMaterialUpdate([...(materials || []), newMaterial]);
       }
       
-      handleClose();
+      setFormData({
+        title: '',
+        description: '',
+        materialType: 'LECTURE_NOTE',
+        unit: '1'
+      });
+      setSelectedFile(null);
+      
+      alert('Material uploaded successfully! You can upload another or close the dialog.');
     } catch (error) {
       console.error('Error uploading material:', error);
+      alert('Error uploading material. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -109,28 +122,34 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
     try {
       await api.delete(`/courses/${courseId}/materials/${semesterId}/material/${materialId}`);
       if (onMaterialUpdate) {
-        onMaterialUpdate(materials.filter(m => m._id !== materialId));
+        onMaterialUpdate((materials || []).filter(m => m._id !== materialId));
       }
     } catch (error) {
       console.error('Error deleting material:', error);
+      alert('Error deleting material. Please try again.');
     }
   };
+
+  const isInstructorOrCA = userRole === 'FACULTY' || userRole === 'CA' || userRole === 'STUDENT';
 
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h6">Course Materials</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleClickOpen}
-        >
-          Add Material
-        </Button>
+        {isInstructorOrCA && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleClickOpen}
+            disabled={loading}
+          >
+            Add Material
+          </Button>
+        )}
       </Box>
 
       <Grid container spacing={3}>
-        {materials.map((material) => (
+        {Array.isArray(materials) && materials.map((material) => (
           <Grid item xs={12} md={6} key={material._id}>
             <Card>
               <CardContent>
@@ -143,7 +162,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
                   </Box>
                   <Box>
                     <Chip
-                      label={material.materialType}
+                      label={material.materialType.replace('_', ' ')}
                       color="primary"
                       size="small"
                       sx={{ mr: 1 }}
@@ -172,7 +191,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
                     >
                       <Download />
                     </IconButton>
-                    {(user.role === 'FACULTY' || user.role === 'CA') && (
+                    {isInstructorOrCA && (
                       <IconButton
                         size="small"
                         color="error"
@@ -189,8 +208,14 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
         ))}
       </Grid>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Course Material</DialogTitle>
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth="sm" 
+        fullWidth
+        disableEscapeKeyDown={loading}
+      >
+        <DialogTitle>Add New Material</DialogTitle>
         <DialogContent>
           <Box component="form" noValidate sx={{ mt: 2 }}>
             <TextField
@@ -200,6 +225,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               margin="normal"
               required
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -209,6 +235,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
               margin="normal"
               multiline
               rows={3}
+              disabled={loading}
             />
             <TextField
               select
@@ -217,6 +244,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
               value={formData.materialType}
               onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
               margin="normal"
+              disabled={loading}
             >
               {MATERIAL_TYPES.map((type) => (
                 <MenuItem key={type} value={type}>
@@ -226,23 +254,26 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
             </TextField>
             <TextField
               fullWidth
-              label="Unit Number"
+              label="Unit"
               type="number"
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
               margin="normal"
-              inputProps={{ min: "1", step: "1" }}
+              inputProps={{ min: "1" }}
+              disabled={loading}
             />
             <Button
               variant="outlined"
               component="label"
               sx={{ mt: 2, width: '100%' }}
+              disabled={loading}
             >
-              Upload File
+              {selectedFile ? 'Change File' : 'Upload Material'}
               <input
                 type="file"
                 hidden
                 onChange={handleFileChange}
+                disabled={loading}
               />
             </Button>
             {selectedFile && (
@@ -253,7 +284,7 @@ const MaterialsTab = ({ materials = [], courseId, semesterId, onMaterialUpdate }
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose} disabled={loading}>Close</Button>
           <Button 
             onClick={handleSubmit} 
             variant="contained" 
