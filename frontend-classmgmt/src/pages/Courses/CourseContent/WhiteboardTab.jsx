@@ -14,29 +14,39 @@ import {
   CardMedia,
   IconButton,
   Divider,
+  MobileStepper,
+  Paper,
+  Fade,
 } from '@mui/material';
 import {
   Add as AddIcon,
   ZoomIn as ZoomInIcon,
   Delete as DeleteIcon,
-  Download
+  Download,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import { useAuth } from '../../../context/AuthContext';
 import api from '../../../utils/api';
+import { useTheme } from '@mui/material/styles';
 
 const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     topic: '',
-    lectureDate: new Date(),
+    lectureDate: dayjs(),
   });
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -44,34 +54,46 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
     setFormData({
       title: '',
       topic: '',
-      lectureDate: new Date(),
+      lectureDate: dayjs(),
     });
-    setSelectedFile(null);
+    setSelectedFiles([]);
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      setSelectedFile(file);
-    } else {
-      alert('Please select an image file');
+    const files = Array.from(event.target.files);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length !== files.length) {
+      alert('Some files were skipped as they are not images');
     }
+
+    if (validFiles.length > 0) {
+      setSelectedFiles(prevFiles => [...prevFiles, ...validFiles]);
+    }
+  };
+
+  const removeFile = (index) => {
+    setSelectedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedFile) {
-      alert('Please select an image file');
+    if (selectedFiles.length === 0) {
+      alert('Please select at least one image');
       return;
     }
 
     setLoading(true);
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('file', selectedFile);
       formDataToSend.append('title', formData.title);
       formDataToSend.append('topic', formData.topic);
       formDataToSend.append('lectureDate', formData.lectureDate.toISOString());
+      
+      // Append all files
+      selectedFiles.forEach((file, index) => {
+        formDataToSend.append('files', file);
+      });
 
       const response = await api.post(
         `/courses/${courseId}/materials/${semesterId}/whiteboard`,
@@ -90,6 +112,7 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
       handleClose();
     } catch (error) {
       console.error('Error uploading whiteboard shot:', error);
+      alert('Error uploading whiteboard shot. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -109,8 +132,21 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
   };
 
   const handlePreview = (shot) => {
-    setPreviewImage(shot);
+    // Handle both array of file objects and single fileUrl
+    const images = Array.isArray(shot.files) 
+      ? shot.files.map(file => file.url || file) 
+      : [shot.fileUrl];
+    setPreviewImages(images);
     setPreviewOpen(true);
+    setActiveStep(0);
+  };
+
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
   };
 
   // Group shots by date
@@ -131,6 +167,7 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleClickOpen}
+          disabled={loading}
         >
           Add Shot
         </Button>
@@ -152,11 +189,29 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
                       <CardMedia
                         component="img"
                         height="200"
-                        image={shot.fileUrl}
+                        image={Array.isArray(shot.files) 
+                          ? (shot.files[0].url || shot.files[0]) 
+                          : shot.fileUrl}
                         alt={shot.title}
                         sx={{ cursor: 'pointer' }}
                         onClick={() => handlePreview(shot)}
                       />
+                      {Array.isArray(shot.files) && shot.files.length > 1 && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            position: 'absolute',
+                            right: 8,
+                            bottom: 8,
+                            bgcolor: 'rgba(0, 0, 0, 0.6)',
+                            color: 'white',
+                            px: 1,
+                            borderRadius: 1,
+                          }}
+                        >
+                          +{shot.files.length - 1} more
+                        </Typography>
+                      )}
                       <IconButton
                         sx={{
                           position: 'absolute',
@@ -182,13 +237,15 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
                       <Box display="flex" justifyContent="flex-end" mt={1}>
                         <IconButton
                           size="small"
-                          href={shot.fileUrl}
+                          href={Array.isArray(shot.files) 
+                            ? (shot.files[0].url || shot.files[0]) 
+                            : shot.fileUrl}
                           target="_blank"
                           download
                         >
                           <Download />
                         </IconButton>
-                        {(user.role === 'FACULTY' || user.role === 'CA') && (
+                        {(userRole === 'FACULTY' || userRole === 'CA') && (
                           <IconButton
                             size="small"
                             color="error"
@@ -217,6 +274,7 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               margin="normal"
               required
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -225,39 +283,79 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
               onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
               margin="normal"
               required
+              disabled={loading}
             />
             <DatePicker
               label="Lecture Date"
               value={formData.lectureDate}
               onChange={(newValue) => setFormData({ ...formData, lectureDate: newValue })}
               sx={{ mt: 2, width: '100%' }}
+              disabled={loading}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  required: true,
+                  margin: "normal"
+                }
+              }}
             />
-            <Button
-              variant="outlined"
-              component="label"
-              sx={{ mt: 2, width: '100%' }}
-            >
-              Upload Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </Button>
-            {selectedFile && (
-              <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                Selected file: {selectedFile.name}
-              </Typography>
+            <Box sx={{ mt: 2 }}>
+              <Button
+                variant="outlined"
+                component="label"
+                fullWidth
+                startIcon={<CloudUploadIcon />}
+                disabled={loading}
+              >
+                Add Images
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={loading}
+                />
+              </Button>
+            </Box>
+            {selectedFiles.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Selected Files ({selectedFiles.length}):
+                </Typography>
+                <Grid container spacing={1}>
+                  {selectedFiles.map((file, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        sx={{ p: 1, bgcolor: 'background.paper', borderRadius: 1 }}
+                      >
+                        <Typography variant="body2" noWrap sx={{ flex: 1 }}>
+                          {file.name}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => removeFile(index)}
+                          disabled={loading}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
             )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose} disabled={loading}>Cancel</Button>
           <Button 
             onClick={handleSubmit} 
             variant="contained" 
-            disabled={loading || !formData.title || !formData.topic || !selectedFile}
+            disabled={loading || !formData.title || !formData.topic || selectedFiles.length === 0 || !formData.lectureDate}
           >
             {loading ? 'Uploading...' : 'Upload'}
           </Button>
@@ -270,26 +368,74 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
         maxWidth="xl"
         fullWidth
       >
-        <DialogContent>
-          <img
-            src={previewImage?.fileUrl}
-            alt={previewImage?.title}
-            style={{
-              width: '100%',
-              height: 'auto',
-              objectFit: 'contain'
-            }}
-          />
+        <DialogContent sx={{ p: 0, position: 'relative', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {previewImages.map((image, index) => (
+            <Fade in={activeStep === index} key={index} timeout={300}>
+              <Box
+                sx={{
+                  display: activeStep === index ? 'block' : 'none',
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                  textAlign: 'center'
+                }}
+              >
+                <img
+                  src={image}
+                  alt={`Slide ${index + 1}`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: 'calc(80vh - 96px)',
+                    objectFit: 'contain',
+                    margin: '0 auto',
+                  }}
+                />
+              </Box>
+            </Fade>
+          ))}
+          {previewImages.length > 1 && (
+            <MobileStepper
+              steps={previewImages.length}
+              position="static"
+              activeStep={activeStep}
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                bgcolor: 'rgba(255, 255, 255, 0.8)',
+              }}
+              nextButton={
+                <Button
+                  size="small"
+                  onClick={handleNext}
+                  disabled={activeStep === previewImages.length - 1}
+                >
+                  Next
+                  {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
+                  {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                  Back
+                </Button>
+              }
+            />
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewOpen(false)}>Close</Button>
           <Button
             variant="contained"
-            href={previewImage?.fileUrl}
+            href={previewImages[activeStep]}
             target="_blank"
             download
           >
-            Download
+            Download Current Image
           </Button>
         </DialogActions>
       </Dialog>
