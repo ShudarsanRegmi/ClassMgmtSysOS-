@@ -103,6 +103,11 @@ const sharedNoteSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    sharedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 });
 

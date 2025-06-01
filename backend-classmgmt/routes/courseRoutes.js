@@ -8,7 +8,8 @@ const {
     uploadMaterial,
     updateMaterial,
     deleteMaterial,
-    toggleNoteLike
+    toggleNoteLike,
+    getClassStudents
 } = require('../controllers/courseMaterialController');
 
 router.post('/create', courseController.createCourse);
@@ -28,5 +29,8 @@ router.post('/:courseId/materials/:semesterId/:type', verifyToken, upload.single
 router.put('/:courseId/materials/:semesterId/:type/:id', verifyToken, upload.single('file'), updateMaterial);
 router.delete('/:courseId/materials/:semesterId/:type/:id', verifyToken, deleteMaterial);
 router.post('/:courseId/materials/:semesterId/notes/:id/like', verifyToken, toggleNoteLike);
+
+// Get class students
+router.get('/courses/:courseId/materials/:semesterId/students', verifyToken, getClassStudents);
 
 module.exports = router;
