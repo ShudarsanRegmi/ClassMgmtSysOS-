@@ -139,8 +139,8 @@ const StandaloneCourseView = () => {
         />;
       case 'materials':
         return <MaterialsTab 
-          materials={materials?.courseMaterials}
-          courseId={courseId}
+          materials={materials?.courseMaterials || []} 
+          courseId={courseId} 
           semesterId={semesterId}
           onMaterialUpdate={(updatedMaterials) => {
             setMaterials(prev => ({
