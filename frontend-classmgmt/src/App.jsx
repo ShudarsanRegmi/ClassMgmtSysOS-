@@ -21,6 +21,7 @@ import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
 import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import NoticeBoard from './components/NoticeBoard';
 import NoticeForm from './components/NoticeForm';
+import StandaloneCourseView from "./pages/Courses/StandaloneCourseView";
 
 import "./App.css";
 
@@ -60,6 +61,13 @@ function App() {
               <Route path="results" element={<div>Results Component</div>} />
               <Route path="settings" element={<div>Settings Component</div>} />
             </Route>
+
+            {/* Standalone Course View */}
+            <Route path="/courses/:courseId/semester/:semesterId" element={
+              <PrivateRoute>
+                <StandaloneCourseView />
+              </PrivateRoute>
+            } />
             
             {/* Protected Routes */}
             <Route path='/profile' element={
