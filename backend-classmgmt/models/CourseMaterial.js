@@ -30,14 +30,6 @@ const materialBaseSchema = {
         type: String,
         required: true
     },
-    fileUrl: {
-        type: String,
-        required: true
-    },
-    fileType: {
-        type: String,
-        required: true
-    },
     uploadedAt: {
         type: Date,
         default: Date.now
@@ -47,6 +39,14 @@ const materialBaseSchema = {
 // Deadline Schema
 const deadlineSchema = new mongoose.Schema({
     ...materialBaseSchema,
+    fileUrl: {
+        type: String,
+        required: true
+    },
+    fileType: {
+        type: String,
+        required: true
+    },
     dueDate: {
         type: Date,
         required: true
@@ -66,6 +66,14 @@ const deadlineSchema = new mongoose.Schema({
 // Syllabus Schema
 const syllabusSchema = new mongoose.Schema({
     ...materialBaseSchema,
+    fileUrl: {
+        type: String,
+        required: true
+    },
+    fileType: {
+        type: String,
+        required: true
+    },
     units: [{
         title: String,
         topics: [String],
@@ -81,6 +89,14 @@ const syllabusSchema = new mongoose.Schema({
 // Course Material Schema (for lecture notes, presentations, etc.)
 const courseMaterialSchema = new mongoose.Schema({
     ...materialBaseSchema,
+    fileUrl: {
+        type: String,
+        required: true
+    },
+    fileType: {
+        type: String,
+        required: true
+    },
     materialType: {
         type: String,
         enum: ['LECTURE_NOTE', 'PRESENTATION', 'REFERENCE', 'OTHER'],
@@ -95,6 +111,14 @@ const courseMaterialSchema = new mongoose.Schema({
 // Shared Notes Schema
 const sharedNoteSchema = new mongoose.Schema({
     ...materialBaseSchema,
+    fileUrl: {
+        type: String,
+        required: true
+    },
+    fileType: {
+        type: String,
+        required: true
+    },
     tags: [String],
     likes: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -114,6 +138,16 @@ const sharedNoteSchema = new mongoose.Schema({
 // Whiteboard Shot Schema
 const whiteboardShotSchema = new mongoose.Schema({
     ...materialBaseSchema,
+    files: [{
+        url: {
+            type: String,
+            required: true
+        },
+        type: {
+            type: String,
+            required: true
+        }
+    }],
     topic: {
         type: String,
         required: true

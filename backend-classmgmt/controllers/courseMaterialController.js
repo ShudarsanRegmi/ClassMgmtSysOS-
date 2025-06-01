@@ -123,13 +123,6 @@ const uploadMaterial = async (req, res) => {
         const { type, courseId, semesterId } = req.params;
         const { user } = req;
 
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'No file uploaded'
-            });
-        }
-
         // Get user's class
         const userDetails = await User.findOne({ uid: user.uid });
         if (!userDetails) {
@@ -142,46 +135,76 @@ const uploadMaterial = async (req, res) => {
             return res.status(404).json({ message: "Class not found" });
         }
 
-        // Upload file to Cloudinary
-        const fileUrl = await handleFileUpload(req.file, `classmgmt/${type}`);
-
         const materialData = {
             ...req.body,
             uploadedBy: userDetails._id,
             courseId,
             semesterId,
             classId: classDetails._id,
-            fileUrl,
-            fileType: req.file.mimetype
         };
 
         let material;
-        switch (type) {
-            case 'deadline':
-                material = new Deadline(materialData);
-                break;
-            case 'syllabus':
-                material = new Syllabus(materialData);
-                break;
-            case 'material':
-                material = new CourseMaterial(materialData);
-                break;
-            case 'note':
-                material = new SharedNote(materialData);
-                break;
-            case 'whiteboard':
-                material = new WhiteboardShot(materialData);
-                break;
-            default:
+        
+        if (type === 'whiteboard') {
+            // Handle multiple files for whiteboard shots
+            if (!req.files || req.files.length === 0) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Invalid material type'
+                    message: 'No files uploaded'
                 });
+            }
+
+            // Upload all files to Cloudinary
+            const uploadPromises = req.files.map(file => handleFileUpload(file, `classmgmt/${type}`));
+            const fileUrls = await Promise.all(uploadPromises);
+
+            // Create files array with URLs and types
+            materialData.files = fileUrls.map((url, index) => ({
+                url,
+                type: req.files[index].mimetype
+            }));
+
+            material = new WhiteboardShot(materialData);
+        } else {
+            // Handle single file upload for other material types
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'No file uploaded'
+                });
+            }
+
+            // Upload file to Cloudinary
+            const fileUrl = await handleFileUpload(req.file, `classmgmt/${type}`);
+            materialData.fileUrl = fileUrl;
+            materialData.fileType = req.file.mimetype;
+
+            switch (type) {
+                case 'deadline':
+                    material = new Deadline(materialData);
+                    break;
+                case 'syllabus':
+                    material = new Syllabus(materialData);
+                    break;
+                case 'material':
+                    material = new CourseMaterial(materialData);
+                    break;
+                case 'note':
+                    material = new SharedNote(materialData);
+                    break;
+                default:
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Invalid material type'
+                    });
+            }
         }
 
         await material.save();
-        await material.populate('uploadedBy', 'name email photoUrl');
         
+        // Populate uploadedBy field
+        await material.populate('uploadedBy', 'name email photoUrl');
+
         res.status(201).json({
             success: true,
             data: material
