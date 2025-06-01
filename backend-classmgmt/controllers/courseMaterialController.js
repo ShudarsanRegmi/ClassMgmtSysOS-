@@ -7,6 +7,9 @@ const {
 } = require('../models/CourseMaterial');
 const User = require('../models/User');
 const Class = require('../models/Class');
+const uploadToCloudinary = require('../utils/cloudinaryUploader');
+const fs = require('fs').promises;
+const path = require('path');
 
 // Helper function to handle errors
 const handleError = (res, error) => {
@@ -16,6 +19,29 @@ const handleError = (res, error) => {
         message: 'Internal server error',
         error: error.message
     });
+};
+
+// Helper function to handle file upload
+const handleFileUpload = async (file, folder = 'classmgmt') => {
+    try {
+        // Create temp directory if it doesn't exist
+        const tempDir = path.join(__dirname, '../temp');
+        await fs.mkdir(tempDir, { recursive: true });
+
+        // Save file temporarily
+        const tempFilePath = path.join(tempDir, file.originalname);
+        await fs.writeFile(tempFilePath, file.buffer);
+
+        // Upload to Cloudinary
+        const result = await uploadToCloudinary(tempFilePath, folder);
+
+        // Clean up temp file
+        await fs.unlink(tempFilePath);
+
+        return result.secure_url;
+    } catch (error) {
+        throw new Error('File upload failed: ' + error.message);
+    }
 };
 
 // Get all materials for a course
@@ -102,12 +128,39 @@ const getCourseMaterials = async (req, res) => {
 // Upload new material
 const uploadMaterial = async (req, res) => {
     try {
-        const { type, courseId } = req.params;
+        const { type, courseId, semesterId } = req.params;
         const { user } = req;
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file uploaded'
+            });
+        }
+
+        // Get user's class
+        const userDetails = await User.findOne({ uid: user.uid });
+        if (!userDetails) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get class details using classId string
+        const classDetails = await Class.findOne({ classId: userDetails.classId });
+        if (!classDetails) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+
+        // Upload file to Cloudinary
+        const fileUrl = await handleFileUpload(req.file, `classmgmt/${type}`);
+
         const materialData = {
             ...req.body,
-            uploadedBy: user.uid,
-            courseId
+            uploadedBy: userDetails._id,
+            courseId,
+            semesterId,
+            classId: classDetails._id,
+            fileUrl,
+            fileType: req.file.mimetype
         };
 
         let material;
@@ -135,8 +188,6 @@ const uploadMaterial = async (req, res) => {
         }
 
         await material.save();
-        
-        // Populate the uploadedBy field before sending response
         await material.populate('uploadedBy', 'name email photoUrl');
         
         res.status(201).json({
@@ -152,8 +203,19 @@ const uploadMaterial = async (req, res) => {
 // Update material
 const updateMaterial = async (req, res) => {
     try {
-        const { type, id, courseId } = req.params;
-        const updateData = req.body;
+        const { type, id, courseId, semesterId } = req.params;
+        const { user } = req;
+        let updateData = req.body;
+
+        // If file is included in update
+        if (req.file) {
+            const fileUrl = await handleFileUpload(req.file, `classmgmt/${type}`);
+            updateData = {
+                ...updateData,
+                fileUrl,
+                fileType: req.file.mimetype
+            };
+        }
 
         let Model;
         switch (type) {
@@ -180,7 +242,7 @@ const updateMaterial = async (req, res) => {
         }
 
         const material = await Model.findOneAndUpdate(
-            { _id: id, courseId },
+            { _id: id, courseId, semesterId },
             updateData,
             { 
                 new: true, 
@@ -208,7 +270,7 @@ const updateMaterial = async (req, res) => {
 // Delete material
 const deleteMaterial = async (req, res) => {
     try {
-        const { type, id, courseId } = req.params;
+        const { type, id, courseId, semesterId } = req.params;
 
         let Model;
         switch (type) {
@@ -234,7 +296,7 @@ const deleteMaterial = async (req, res) => {
                 });
         }
 
-        const material = await Model.findOneAndDelete({ _id: id, courseId });
+        const material = await Model.findOneAndDelete({ _id: id, courseId, semesterId });
 
         if (!material) {
             return res.status(404).json({
@@ -242,6 +304,8 @@ const deleteMaterial = async (req, res) => {
                 message: 'Material not found'
             });
         }
+
+        // TODO: Delete file from Cloudinary if needed
 
         res.status(200).json({
             success: true,
@@ -256,10 +320,16 @@ const deleteMaterial = async (req, res) => {
 // Toggle like on shared note
 const toggleNoteLike = async (req, res) => {
     try {
-        const { id, courseId } = req.params;
+        const { id, courseId, semesterId } = req.params;
         const { user } = req;
 
-        const note = await SharedNote.findOne({ _id: id, courseId });
+        // Get user details
+        const userDetails = await User.findOne({ uid: user.uid });
+        if (!userDetails) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const note = await SharedNote.findOne({ _id: id, courseId, semesterId });
         if (!note) {
             return res.status(404).json({
                 success: false,
@@ -267,9 +337,9 @@ const toggleNoteLike = async (req, res) => {
             });
         }
 
-        const likeIndex = note.likes.indexOf(user.uid);
+        const likeIndex = note.likes.indexOf(userDetails._id);
         if (likeIndex === -1) {
-            note.likes.push(user.uid);
+            note.likes.push(userDetails._id);
         } else {
             note.likes.splice(likeIndex, 1);
         }

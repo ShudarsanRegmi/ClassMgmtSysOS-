@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Login from "./components/Login";
@@ -31,124 +33,126 @@ window.firebase = { auth };
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile-form" element={<ProfileForm />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/logout" element={<Logout />} />
-            
-            {/* Dashboard and its nested routes */}
-            <Route path="/dashboard" element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }>
-              <Route index element={
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Default dashboard content/widgets */}
-                </div>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Router>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Navbar />
+          <main className="flex-grow container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile-form" element={<ProfileForm />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/logout" element={<Logout />} />
+              
+              {/* Dashboard and its nested routes */}
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }>
+                <Route index element={
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Default dashboard content/widgets */}
+                  </div>
+                } />
+                <Route path="courses" element={<SemesterCourses />} />
+                <Route path="schedule" element={<div>Schedule Component</div>} />
+                <Route path="assignments" element={<div>Assignments Component</div>} />
+                <Route path="students" element={<div>Students Component</div>} />
+                <Route path="faculty" element={<div>Faculty Component</div>} />
+                <Route path="results" element={<div>Results Component</div>} />
+                <Route path="settings" element={<div>Settings Component</div>} />
+              </Route>
+
+              {/* Standalone Course View */}
+              <Route path="/courses/:courseId/semester/:semesterId" element={
+                <PrivateRoute>
+                  <StandaloneCourseView />
+                </PrivateRoute>
               } />
-              <Route path="courses" element={<SemesterCourses />} />
-              <Route path="schedule" element={<div>Schedule Component</div>} />
-              <Route path="assignments" element={<div>Assignments Component</div>} />
-              <Route path="students" element={<div>Students Component</div>} />
-              <Route path="faculty" element={<div>Faculty Component</div>} />
-              <Route path="results" element={<div>Results Component</div>} />
-              <Route path="settings" element={<div>Settings Component</div>} />
-            </Route>
+              
+              {/* Protected Routes */}
+              <Route path='/profile' element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/fileupload" element={
+                <PrivateRoute>
+                  <Fileupload />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/cr/dashboard" element={
+                <PrivateRoute>
+                  <CRDashboard />
+                </PrivateRoute>
+              } />
 
-            {/* Standalone Course View */}
-            <Route path="/courses/:courseId/semester/:semesterId" element={
-              <PrivateRoute>
-                <StandaloneCourseView />
-              </PrivateRoute>
-            } />
-            
-            {/* Protected Routes */}
-            <Route path='/profile' element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/fileupload" element={
-              <PrivateRoute>
-                <Fileupload />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/cr/dashboard" element={
-              <PrivateRoute>
-                <CRDashboard />
-              </PrivateRoute>
-            } />
+              {/* Class Routes */}
+              <Route path="/class/add" element={
+                <PrivateRoute>
+                  <AddClass />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/class/home" element={
+                <PrivateRoute>
+                  <ClassHomepage />
+                </PrivateRoute>
+              } />
 
-            {/* Class Routes */}
-            <Route path="/class/add" element={
-              <PrivateRoute>
-                <AddClass />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/class/home" element={
-              <PrivateRoute>
-                <ClassHomepage />
-              </PrivateRoute>
-            } />
+              {/* Academic Routes */}
+              <Route path="/sem/add" element={
+                <PrivateRoute>
+                  <AddSemester />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/faculties/register" element={
+                <PrivateRoute>
+                  <CreateFaculty />
+                </PrivateRoute>
+              } />
+              
+              <Route path="/courses/create" element={
+                <PrivateRoute>
+                  <CreateCourse />
+                </PrivateRoute>
+              } />
 
-            {/* Academic Routes */}
-            <Route path="/sem/add" element={
-              <PrivateRoute>
-                <AddSemester />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/faculties/register" element={
-              <PrivateRoute>
-                <CreateFaculty />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/courses/create" element={
-              <PrivateRoute>
-                <CreateCourse />
-              </PrivateRoute>
-            } />
+              {/* Admin Routes */}
+              <Route path="/admin/settings" element={
+                <PrivateRoute>
+                  <SystemSettingsForm />
+                </PrivateRoute>
+              } />
 
-            {/* Admin Routes */}
-            <Route path="/admin/settings" element={
-              <PrivateRoute>
-                <SystemSettingsForm />
-              </PrivateRoute>
-            } />
-
-            <Route path="/courses/assignment" element={
-              <PrivateRoute>
-                <CourseAssignmentForm />
-              </PrivateRoute>
-            } />
-            
-            {/* Notice Board Routes */}
-            <Route path="/notices" element={<NoticeBoard />} />
-            <Route path="/notices/create" element={
-              <PrivateRoute>
-                <NoticeForm />
-              </PrivateRoute>
-            } />
-            <Route path="/notices/edit/:id" element={
-              <PrivateRoute>
-                <NoticeForm />
-              </PrivateRoute>
-            } />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+              <Route path="/courses/assignment" element={
+                <PrivateRoute>
+                  <CourseAssignmentForm />
+                </PrivateRoute>
+              } />
+              
+              {/* Notice Board Routes */}
+              <Route path="/notices" element={<NoticeBoard />} />
+              <Route path="/notices/create" element={
+                <PrivateRoute>
+                  <NoticeForm />
+                </PrivateRoute>
+              } />
+              <Route path="/notices/edit/:id" element={
+                <PrivateRoute>
+                  <NoticeForm />
+                </PrivateRoute>
+              } />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </LocalizationProvider>
   );
 }
 
