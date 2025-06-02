@@ -13,6 +13,8 @@ const assignmentRoutes = require('./routes/courseAssignment');
 const noticeRoutes = require('./routes/noticeRoutes');
 const courseMaterialRoutes = require('./routes/courseMaterialRoutes');
 const connectDB = require('./config/db');
+const eventRoutes = require('./routes/event.routes');
+const path = require('path');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swaggerOptions");
@@ -33,6 +35,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/', userRouter); 
@@ -47,6 +52,7 @@ app.use('/api/materials', courseMaterialRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);
 app.use('/api/admin/settings', settingsRoutes);
+app.use('/api/events', eventRoutes);
 
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {
