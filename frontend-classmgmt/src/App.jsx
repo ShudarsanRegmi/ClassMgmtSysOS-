@@ -24,6 +24,7 @@ import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import NoticeBoard from './components/NoticeBoard';
 import NoticeForm from './components/NoticeForm';
 import StandaloneCourseView from "./pages/Courses/StandaloneCourseView";
+import ClassPage from "./pages/Class/ClassPage";
 
 import "./App.css";
 
@@ -101,6 +102,12 @@ function App() {
               <Route path="/class/home" element={
                 <PrivateRoute>
                   <ClassHomepage />
+                </PrivateRoute>
+              } />
+
+              <Route path="/class/timeline" element={
+                <PrivateRoute>
+                  <ClassPage />
                 </PrivateRoute>
               } />
 
