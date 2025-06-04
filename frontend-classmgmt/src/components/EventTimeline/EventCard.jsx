@@ -91,9 +91,6 @@ export default function EventCard({ event, onEdit, onDelete, hasElevatedPrivileg
         }
     };
 
-    console.log("Event object in EventCard:", event); // Debug log
-    console.log("Event id in EventCard:", event.id); // Debug log for specific id field
-
     return (
         <>
             <Card sx={{ maxWidth: 500, mb: 2 }}>

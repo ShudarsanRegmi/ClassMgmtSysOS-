@@ -14,6 +14,7 @@ export default function EventTimeline({ classId }) {
     const { user, currentSemester } = useAuth();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [filters, setFilters] = useState({
         semester: currentSemester?.id || '',
         tags: [],
@@ -50,7 +51,7 @@ export default function EventTimeline({ classId }) {
 
     useEffect(() => {
         fetchEvents();
-    }, [classId, filters]);
+    }, [classId, filters, refreshTrigger]);
 
     // Handle filter changes
     const handleFilterChange = (field, value) => {
@@ -71,14 +72,17 @@ export default function EventTimeline({ classId }) {
     const handleEventAction = async (action, formData = null, eventId = null) => {
         console.log("handleEventAction called with:", { action, eventId }); // Debug log
         try {
+            let updatedEvent;
             switch (action) {
                 case 'create':
-                    await eventService.createEvent(formData);
+                    updatedEvent = await eventService.createEvent(formData);
                     toast.success('Event created successfully');
+                    setRefreshTrigger(prev => prev + 1);
                     break;
                 case 'update':
-                    await eventService.updateEvent(selectedEvent.id, formData);
+                    updatedEvent = await eventService.updateEvent(selectedEvent.id, formData);
                     toast.success('Event updated successfully');
+                    setRefreshTrigger(prev => prev + 1);
                     break;
                 case 'delete':
                     console.log("Attempting to delete event with ID:", eventId); // Debug log
@@ -89,11 +93,11 @@ export default function EventTimeline({ classId }) {
                     }
                     await eventService.deleteEvent(eventId);
                     toast.success('Event deleted successfully');
+                    setRefreshTrigger(prev => prev + 1);
                     break;
                 default:
                     return;
             }
-            fetchEvents();
             setDialogOpen(false);
             setSelectedEvent(null);
         } catch (error) {
