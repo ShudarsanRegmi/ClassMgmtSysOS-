@@ -18,7 +18,6 @@ import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import api from '../../utils/api';
 
 const EVENT_TAGS = ['Academic', 'Cultural', 'Sports', 'Technical', 'Workshop', 'Industrial Visit', 'Other'];
 
@@ -34,8 +33,6 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
-
-    console.log("currentClass", classId);
 
     // Initialize form data when editing
     useEffect(() => {
@@ -142,6 +139,7 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
                 semesterId: currentSemester?.id,
                 classId
             };
+
             submitFormData.append('eventData', JSON.stringify(eventData));
             
             // Add existing images that were not just uploaded
@@ -160,24 +158,12 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
             });
             submitFormData.append('captions', JSON.stringify(captions));
 
-            // Send request using api interceptor with proper headers
-            const response = event
-                ? await api.put(`/events/${event.id}`, submitFormData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                : await api.post('/events', submitFormData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-            onSubmit(response.data.event);
+            // Pass the FormData to parent component
+            onSubmit(submitFormData);
             onClose();
         } catch (error) {
-            console.error('Error submitting event:', error);
-            setError(error.response?.data?.message || 'Failed to submit event. Please try again.');
+            console.error('Error preparing form data:', error);
+            setError('Failed to prepare form data. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
