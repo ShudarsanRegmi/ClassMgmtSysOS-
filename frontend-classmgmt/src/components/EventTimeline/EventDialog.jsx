@@ -18,12 +18,12 @@ import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const EVENT_TAGS = ['Academic', 'Cultural', 'Sports', 'Technical', 'Workshop', 'Industrial Visit', 'Other'];
 
 export default function EventDialog({ open, event, onClose, onSubmit }) {
-    const { currentSemester } = useAuth();
+    const { currentSemester, classId } = useAuth();
     const [formData, setFormData] = useState({
         title: '',
         date: dayjs(),
@@ -31,9 +31,11 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
         tags: [],
         images: []
     });
-    const [imageUrls, setImageUrls] = useState([]);
-    const [isUploading, setIsUploading] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    console.log("currentClass", classId);
 
     // Initialize form data when editing
     useEffect(() => {
@@ -45,6 +47,7 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
                 tags: event.tags || [],
                 images: event.images || []
             });
+            setSelectedFiles([]);
         } else {
             // Reset form for new event
             setFormData({
@@ -54,7 +57,7 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
                 tags: [],
                 images: []
             });
-            setImageUrls([]);
+            setSelectedFiles([]);
         }
     }, [event]);
 
@@ -73,34 +76,22 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
         }));
     };
 
-    // Handle image upload
-    const handleImageUpload = async (e) => {
+    // Handle image selection
+    const handleImageSelection = (e) => {
         const files = Array.from(e.target.files);
-        setIsUploading(true);
-        setError('');
+        setSelectedFiles(prev => [...prev, ...files]);
         
-        try {
-            const formData = new FormData();
-            files.forEach(file => {
-                formData.append('files', file);
-            });
+        // Create preview URLs for selected images
+        const newImages = files.map(file => ({
+            url: URL.createObjectURL(file),
+            caption: '',
+            file: file // Keep reference to file for upload
+        }));
 
-            const response = await axios.post('http://localhost:3001/api/events/upload-images', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            setFormData(prev => ({
-                ...prev,
-                images: [...prev.images, ...response.data.images]
-            }));
-        } catch (error) {
-            console.error('Error uploading images:', error);
-            setError('Failed to upload images. Please try again.');
-        } finally {
-            setIsUploading(false);
-        }
+        setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, ...newImages]
+        }));
     };
 
     // Handle image caption change
@@ -115,26 +106,103 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
 
     // Handle image deletion
     const handleImageDelete = (index) => {
+        // Revoke object URL to prevent memory leaks
+        if (formData.images[index].file) {
+            URL.revokeObjectURL(formData.images[index].url);
+        }
+        
         setFormData(prev => ({
             ...prev,
             images: prev.images.filter((_, i) => i !== index)
         }));
+        
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     // Handle form submission
-    const handleSubmit = () => {
-        const eventData = {
-            ...formData,
-            date: formData.date.toISOString(),
-            semesterId: currentSemester?.id
-        };
-        onSubmit(eventData);
+    const handleSubmit = async () => {
+        if (!classId) {
+            setError('No class selected');
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            setError('');
+
+            // Create form data for multipart submission
+            const submitFormData = new FormData();
+            
+            // Add event data as JSON string
+            const eventData = {
+                title: formData.title,
+                date: formData.date.toISOString(),
+                caption: formData.caption,
+                tags: formData.tags,
+                semesterId: currentSemester?.id,
+                classId
+            };
+            submitFormData.append('eventData', JSON.stringify(eventData));
+            
+            // Add existing images that were not just uploaded
+            const existingImages = formData.images
+                .filter(img => !img.file)
+                .map(img => ({ url: img.url, caption: img.caption }));
+            submitFormData.append('existingImages', JSON.stringify(existingImages));
+            
+            // Add new files and their captions
+            const captions = {};
+            formData.images.forEach((img, index) => {
+                if (img.file) {
+                    submitFormData.append('files', img.file);
+                    captions[index] = img.caption || '';
+                }
+            });
+            submitFormData.append('captions', JSON.stringify(captions));
+
+            // Send request using api interceptor with proper headers
+            const response = event
+                ? await api.put(`/events/${event.id}`, submitFormData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                : await api.post('/events', submitFormData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+            onSubmit(response.data.event);
+            onClose();
+        } catch (error) {
+            console.error('Error submitting event:', error);
+            setError(error.response?.data?.message || 'Failed to submit event. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    // Cleanup object URLs when dialog closes
+    useEffect(() => {
+        return () => {
+            formData.images.forEach(img => {
+                if (img.file) {
+                    URL.revokeObjectURL(img.url);
+                }
+            });
+        };
+    }, []);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>
                 {event ? 'Edit Event' : 'Create New Event'}
+                {classId && (
+                    <Typography variant="subtitle2" color="textSecondary">
+                        Class: {classId}
+                    </Typography>
+                )}
             </DialogTitle>
             <DialogContent dividers>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -194,16 +262,16 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
                             component="label"
                             startIcon={<AddIcon />}
                             sx={{ mb: 2 }}
-                            disabled={isUploading}
+                            disabled={isSubmitting}
                         >
-                            {isUploading ? 'Uploading...' : 'Add Images'}
+                            Add Images
                             <input
                                 type="file"
                                 hidden
                                 multiple
                                 accept="image/*"
-                                onChange={handleImageUpload}
-                                disabled={isUploading}
+                                onChange={handleImageSelection}
+                                disabled={isSubmitting}
                             />
                         </Button>
                         {error && (
@@ -250,9 +318,9 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    disabled={!formData.title || !formData.caption}
+                    disabled={!formData.title || !formData.caption || isSubmitting}
                 >
-                    {event ? 'Update' : 'Create'}
+                    {isSubmitting ? 'Submitting...' : event ? 'Update' : 'Create'}
                 </Button>
             </DialogActions>
         </Dialog>

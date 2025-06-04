@@ -3,11 +3,17 @@ const router = express.Router();
 const Event = require('../models/Event');
 const Class = require('../models/Class');
 const verifyToken = require('../middleware/authmiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const upload = require('../middleware/fileUpload');
 const { eventDto, eventListDto } = require('../dtos/event.dto');
+const uploadToCloudinary = require('../utils/cloudinaryUploader');
 
 // Helper function to check if user has elevated privileges
 const hasElevatedPrivileges = (user, classId) => {
+    const hasElevatedPrivileges = user?.role === 'ADMIN' || 
+    user?.role === 'FACULTY' || 
+    user?.role === 'CR' ||
+    user?.role === 'STUDENT';
+
     // Temporarily allowing all users to create/edit events
     return true;
 };
@@ -61,9 +67,26 @@ router.get('/:eventId', verifyToken, async (req, res) => {
 });
 
 // Create new event (elevated privileges required)
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, upload.array('files'), async (req, res) => {
     try {
-        const { classId } = req.body;
+        // Check if eventData exists
+        if (!req.body.eventData) {
+            return res.status(400).json({ message: 'Event data is required' });
+        }
+
+        // Parse the eventData from form data
+        let eventData;
+        try {
+            eventData = JSON.parse(req.body.eventData);
+        } catch (error) {
+            console.error('Error parsing eventData:', error);
+            return res.status(400).json({ message: 'Invalid event data format' });
+        }
+
+        const { classId } = eventData;
+        if (!classId) {
+            return res.status(400).json({ message: 'Class ID is required' });
+        }
 
         // First, find the class document
         const classDoc = await Class.findOne({ classId }).lean();
@@ -75,9 +98,61 @@ router.post('/', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'Insufficient privileges' });
         }
 
-        const eventData = {
-            ...req.body,
+        // Upload images to Cloudinary if present
+        let images = [];
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(async (file, index) => {
+                try {
+                    // Create a temporary file path
+                    const tempFilePath = `/tmp/${file.originalname}`;
+                    require('fs').writeFileSync(tempFilePath, file.buffer);
+                    
+                    // Upload to Cloudinary
+                    const result = await uploadToCloudinary(tempFilePath, 'event_images');
+                    
+                    // Clean up temp file
+                    require('fs').unlinkSync(tempFilePath);
+
+                    // Get caption from the captions object
+                    let caption = '';
+                    if (req.body.captions) {
+                        try {
+                            const captions = JSON.parse(req.body.captions);
+                            caption = captions[index] || '';
+                        } catch (error) {
+                            console.error('Error parsing captions:', error);
+                        }
+                    }
+                    
+                    return {
+                        url: result.secure_url,
+                        caption
+                    };
+                } catch (error) {
+                    console.error('Error uploading file to Cloudinary:', error);
+                    throw error;
+                }
+            });
+
+            const uploadedImages = await Promise.all(uploadPromises);
+            images = [...uploadedImages];
+        }
+
+        // Add existing images if any
+        if (req.body.existingImages) {
+            try {
+                const existingImages = JSON.parse(req.body.existingImages);
+                images = [...images, ...existingImages];
+            } catch (error) {
+                console.error('Error parsing existing images:', error);
+            }
+        }
+
+        // Create event data
+        const newEventData = {
+            ...eventData,
             classId: classDoc._id,
+            images,
             postedBy: {
                 uid: req.user.uid,
                 name: req.user.name,
@@ -85,19 +160,26 @@ router.post('/', verifyToken, async (req, res) => {
             }
         };
 
-        const event = new Event(eventData);
+        const event = new Event(newEventData);
         await event.save();
 
         res.status(201).json({ event: eventDto(event) });
     } catch (error) {
         console.error('Error creating event:', error);
-        res.status(500).json({ message: 'Error creating event' });
+        res.status(500).json({ 
+            message: 'Error creating event', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
 // Update event (elevated privileges required)
-router.put('/:eventId', verifyToken, async (req, res) => {
+router.put('/:eventId', verifyToken, upload.array('files'), async (req, res) => {
     try {
+        // Parse the eventData from form data
+        const eventData = JSON.parse(req.body.eventData);
+        
         const event = await Event.findById(req.params.eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
@@ -113,15 +195,55 @@ router.put('/:eventId', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'Insufficient privileges' });
         }
 
+        // Handle image uploads similar to create
+        let images = [];
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(async (file, index) => {
+                try {
+                    // Create a temporary file path
+                    const tempFilePath = `/tmp/${file.originalname}`;
+                    require('fs').writeFileSync(tempFilePath, file.buffer);
+                    
+                    // Upload to Cloudinary
+                    const result = await uploadToCloudinary(tempFilePath, 'event_images');
+                    
+                    // Clean up temp file
+                    require('fs').unlinkSync(tempFilePath);
+                    
+                    return {
+                        url: result.secure_url,
+                        caption: req.body.captions ? req.body.captions[index] : ''
+                    };
+                } catch (error) {
+                    console.error('Error uploading file to Cloudinary:', error);
+                    throw error;
+                }
+            });
+
+            const uploadedImages = await Promise.all(uploadPromises);
+            images = [...uploadedImages];
+        }
+
+        // Add existing images if any
+        if (req.body.existingImages) {
+            const existingImages = JSON.parse(req.body.existingImages);
+            images = [...images, ...existingImages];
+        }
+
         const updatedEvent = await Event.findByIdAndUpdate(
             req.params.eventId,
-            { ...req.body, updatedAt: Date.now() },
+            { 
+                ...eventData,
+                images,
+                updatedAt: Date.now() 
+            },
             { new: true }
         ).lean();
 
         res.json({ event: eventDto(updatedEvent) });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating event' });
+        console.error('Error updating event:', error);
+        res.status(500).json({ message: 'Error updating event', error: error.message });
     }
 });
 
@@ -237,12 +359,30 @@ router.post('/upload-images', verifyToken, upload.array('files', 10), async (req
             return res.status(400).json({ message: 'No files uploaded' });
         }
 
-        // Process uploaded files and generate URLs
-        const imageUrls = req.files.map(file => ({
-            url: `http://localhost:3001/uploads/${file.filename}`,
-            caption: ''
-        }));
+        // Upload files to Cloudinary and get URLs
+        const uploadPromises = req.files.map(async (file) => {
+            try {
+                // Create a temporary file path
+                const tempFilePath = `/tmp/${file.originalname}`;
+                require('fs').writeFileSync(tempFilePath, file.buffer);
+                
+                // Upload to Cloudinary
+                const result = await uploadToCloudinary(tempFilePath, 'event_images');
+                
+                // Clean up temp file
+                require('fs').unlinkSync(tempFilePath);
+                
+                return {
+                    url: result.secure_url,
+                    caption: ''
+                };
+            } catch (error) {
+                console.error('Error uploading file to Cloudinary:', error);
+                throw error;
+            }
+        });
 
+        const imageUrls = await Promise.all(uploadPromises);
         res.json({ images: imageUrls });
     } catch (error) {
         console.error('Error uploading images:', error);
