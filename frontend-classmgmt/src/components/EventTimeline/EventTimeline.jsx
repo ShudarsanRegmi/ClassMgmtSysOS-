@@ -67,15 +67,15 @@ export default function EventTimeline({ classId }) {
     };
 
     // Handle event actions
-    const handleEventAction = async (action, eventData = null) => {
+    const handleEventAction = async (action, formData = null) => {
         try {
             switch (action) {
                 case 'create':
-                    await eventService.createEvent({ ...eventData, classId });
+                    await eventService.createEvent(formData);
                     toast.success('Event created successfully');
                     break;
                 case 'update':
-                    await eventService.updateEvent(selectedEvent.id, eventData);
+                    await eventService.updateEvent(selectedEvent.id, formData);
                     toast.success('Event updated successfully');
                     break;
                 case 'delete':

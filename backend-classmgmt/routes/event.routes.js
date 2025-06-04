@@ -177,21 +177,49 @@ router.post('/', verifyToken, upload.array('files'), async (req, res) => {
 // Update event (elevated privileges required)
 router.put('/:eventId', verifyToken, upload.array('files'), async (req, res) => {
     try {
+        console.log('Update event request body:', req.body);
+        console.log('Update event files:', req.files);
+
+        // Check if eventData exists
+        if (!req.body.eventData) {
+            console.error('Missing eventData in request body');
+            return res.status(400).json({ 
+                message: 'Event data is required',
+                receivedBody: req.body 
+            });
+        }
+
         // Parse the eventData from form data
-        const eventData = JSON.parse(req.body.eventData);
-        
+        let eventData;
+        try {
+            eventData = JSON.parse(req.body.eventData);
+            console.log('Parsed eventData:', eventData);
+        } catch (error) {
+            console.error('Error parsing eventData:', error);
+            return res.status(400).json({ 
+                message: 'Invalid event data format',
+                error: error.message,
+                receivedEventData: req.body.eventData
+            });
+        }
+
+        const { classId } = eventData;
+        if (!classId) {
+            return res.status(400).json({ message: 'Class ID is required' });
+        }
+
+        // Find the class document to get MongoDB _id
+        const classDoc = await Class.findOne({ classId }).lean();
+        if (!classDoc) {
+            return res.status(404).json({ message: 'Class not found' });
+        }
+
         const event = await Event.findById(req.params.eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Find the class document to get the class code
-        const classDoc = await Class.findById(event.classId).lean();
-        if (!classDoc) {
-            return res.status(404).json({ message: 'Class not found' });
-        }
-
-        if (!hasElevatedPrivileges(req.user, classDoc.classId)) {
+        if (!hasElevatedPrivileges(req.user, classId)) {
             return res.status(403).json({ message: 'Insufficient privileges' });
         }
 
@@ -209,10 +237,21 @@ router.put('/:eventId', verifyToken, upload.array('files'), async (req, res) => 
                     
                     // Clean up temp file
                     require('fs').unlinkSync(tempFilePath);
+
+                    // Get caption from the captions object
+                    let caption = '';
+                    if (req.body.captions) {
+                        try {
+                            const captions = JSON.parse(req.body.captions);
+                            caption = captions[index] || '';
+                        } catch (error) {
+                            console.error('Error parsing captions:', error);
+                        }
+                    }
                     
                     return {
                         url: result.secure_url,
-                        caption: req.body.captions ? req.body.captions[index] : ''
+                        caption
                     };
                 } catch (error) {
                     console.error('Error uploading file to Cloudinary:', error);
@@ -226,24 +265,38 @@ router.put('/:eventId', verifyToken, upload.array('files'), async (req, res) => 
 
         // Add existing images if any
         if (req.body.existingImages) {
-            const existingImages = JSON.parse(req.body.existingImages);
-            images = [...images, ...existingImages];
+            try {
+                const existingImages = JSON.parse(req.body.existingImages);
+                images = [...images, ...existingImages];
+            } catch (error) {
+                console.error('Error parsing existing images:', error);
+            }
         }
+
+        // Update the event with the new data
+        const updatedEventData = {
+            ...eventData,
+            classId: classDoc._id, // Use MongoDB _id instead of classId string
+            images,
+            updatedAt: Date.now()
+        };
+
+        console.log('Final updated event data:', updatedEventData);
 
         const updatedEvent = await Event.findByIdAndUpdate(
             req.params.eventId,
-            { 
-                ...eventData,
-                images,
-                updatedAt: Date.now() 
-            },
+            updatedEventData,
             { new: true }
         ).lean();
 
         res.json({ event: eventDto(updatedEvent) });
     } catch (error) {
         console.error('Error updating event:', error);
-        res.status(500).json({ message: 'Error updating event', error: error.message });
+        res.status(500).json({ 
+            message: 'Error updating event', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 

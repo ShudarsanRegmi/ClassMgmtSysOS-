@@ -23,14 +23,22 @@ export const eventService = {
     },
 
     // Create new event
-    createEvent: async (eventData) => {
-        const response = await api.post('/events', eventData);
+    createEvent: async (formData) => {
+        const response = await api.post('/events', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data.event;
     },
 
     // Update event
-    updateEvent: async (eventId, eventData) => {
-        const response = await api.put(`/events/${eventId}`, eventData);
+    updateEvent: async (eventId, formData) => {
+        const response = await api.put(`/events/${eventId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data.event;
     },
 
