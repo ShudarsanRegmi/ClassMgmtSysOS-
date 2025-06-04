@@ -91,6 +91,9 @@ export default function EventCard({ event, onEdit, onDelete, hasElevatedPrivileg
         }
     };
 
+    console.log("Event object in EventCard:", event); // Debug log
+    console.log("Event id in EventCard:", event.id); // Debug log for specific id field
+
     return (
         <>
             <Card sx={{ maxWidth: 500, mb: 2 }}>
@@ -119,8 +122,9 @@ export default function EventCard({ event, onEdit, onDelete, hasElevatedPrivileg
                                         <EditIcon sx={{ mr: 1 }} /> Edit
                                     </MenuItem>
                                     <MenuItem onClick={() => {
+                                        console.log("Deleting event with id:", event.id); // Debug log before delete
                                         setAnchorEl(null);
-                                        onDelete();
+                                        onDelete(event.id);
                                     }}>
                                         <DeleteIcon sx={{ mr: 1 }} /> Delete
                                     </MenuItem>
