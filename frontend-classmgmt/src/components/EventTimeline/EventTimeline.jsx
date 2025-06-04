@@ -38,6 +38,7 @@ export default function EventTimeline({ classId }) {
         try {
             setLoading(true);
             const data = await eventService.getClassEvents(classId, filters);
+            console.log("Fetched events:", data); // Debug log
             setEvents(data);
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -67,7 +68,8 @@ export default function EventTimeline({ classId }) {
     };
 
     // Handle event actions
-    const handleEventAction = async (action, formData = null) => {
+    const handleEventAction = async (action, formData = null, eventId = null) => {
+        console.log("handleEventAction called with:", { action, eventId }); // Debug log
         try {
             switch (action) {
                 case 'create':
@@ -79,7 +81,13 @@ export default function EventTimeline({ classId }) {
                     toast.success('Event updated successfully');
                     break;
                 case 'delete':
-                    await eventService.deleteEvent(selectedEvent.id);
+                    console.log("Attempting to delete event with ID:", eventId); // Debug log
+                    if (!eventId) {
+                        console.error("No event ID provided for deletion");
+                        toast.error('Cannot delete event: Missing event ID');
+                        return;
+                    }
+                    await eventService.deleteEvent(eventId);
                     toast.success('Event deleted successfully');
                     break;
                 default:
@@ -188,9 +196,11 @@ export default function EventTimeline({ classId }) {
                                         setSelectedEvent(event);
                                         setDialogOpen(true);
                                     }}
-                                    onDelete={() => {
-                                        setSelectedEvent(event);
-                                        handleEventAction('delete');
+                                    onDelete={(eventId) => {
+                                        console.log("onDelete called with eventId:", eventId); // Debug log
+                                        if (window.confirm('Are you sure you want to delete this event?')) {
+                                            handleEventAction('delete', null, eventId);
+                                        }
                                     }}
                                     hasElevatedPrivileges={hasElevatedPrivileges}
                                 />

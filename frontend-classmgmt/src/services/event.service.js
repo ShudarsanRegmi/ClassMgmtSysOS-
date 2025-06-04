@@ -44,6 +44,10 @@ export const eventService = {
 
     // Delete event
     deleteEvent: async (eventId) => {
+        console.log("deleteEvent called with eventId:", eventId); // Debug log
+        if (!eventId) {
+            throw new Error('Event ID is required for deletion');
+        }
         await api.delete(`/events/${eventId}`);
     },
 
