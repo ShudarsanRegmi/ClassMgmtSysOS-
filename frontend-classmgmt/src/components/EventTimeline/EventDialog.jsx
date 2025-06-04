@@ -185,7 +185,7 @@ export default function EventDialog({ open, event, onClose, onSubmit }) {
             <DialogTitle>
                 {event ? 'Edit Event' : 'Create New Event'}
                 {classId && (
-                    <Typography variant="subtitle2" color="textSecondary">
+                    <Typography variant="subtitle2" component="div" color="textSecondary">
                         Class: {classId}
                     </Typography>
                 )}
