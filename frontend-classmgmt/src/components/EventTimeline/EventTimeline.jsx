@@ -26,7 +26,12 @@ export default function EventTimeline({ classId }) {
     const [selectedEvent, setSelectedEvent] = useState(null);
 
     // Check if user has elevated privileges using the class code
-    const hasElevatedPrivileges = true; // Temporarily allowing all users to create/edit events
+    let hasElevatedPrivileges = user?.role === 'ADMIN' || 
+    user?.role === 'FACULTY' || 
+    user?.role === 'CR' ||
+    user?.role === 'STUDENT';
+
+    hasElevatedPrivileges = true; // Temporarily allowing all users to create/edit events
 
     // Fetch events using class code
     const fetchEvents = async () => {
