@@ -1,57 +1,65 @@
-const Faculty = require('../models/Faculties');
 const User = require('../models/User');
+const CourseAssignment = require('../models/CourseAssignment');
+const Course = require('../models/Course');
+const Class = require('../models/Class');
 
-// Create a new faculty
-const createFaculty = async (req, res) => {
+// Get faculty members for a specific class and semester
+const getFacultyMembers = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { classId, semesterId } = req.params;
 
-    if (!name || !email) {
-      return res.status(400).json({ message: "Name and email are required." });
+    // First get the class document to get the MongoDB _id
+    const classDoc = await Class.findOne({ classId });
+    if (!classDoc) {
+      return res.status(404).json({ message: 'Class not found' });
     }
 
-    const newFaculty = new Faculty({ name, email });
-    await newFaculty.save();
+    // Find all course assignments for the class and semester
+    const assignments = await CourseAssignment.find({
+      class: classDoc._id,
+      semester: semesterId
+    })
+    .populate({
+      path: 'faculty',
+      match: { role: 'FACULTY' }, // Only get users with role FACULTY
+      select: 'name email phone photoUrl' // Select only needed fields
+    })
+    .populate('course', 'title')
+    .lean();
 
-    res.status(201).json({ message: "Faculty created successfully", data: newFaculty });
+    // Filter out any assignments where faculty wasn't found
+    const validAssignments = assignments.filter(assignment => assignment.faculty);
+
+    // Group assignments by faculty
+    const facultyMap = new Map();
+    validAssignments.forEach(assignment => {
+      const faculty = assignment.faculty;
+      if (!facultyMap.has(faculty._id.toString())) {
+        facultyMap.set(faculty._id.toString(), {
+          _id: faculty._id,
+          name: faculty.name,
+          email: faculty.email,
+          phone: faculty.phone,
+          photoUrl: faculty.photoUrl,
+          courses: [assignment.course.title]
+        });
+      } else {
+        facultyMap.get(faculty._id.toString()).courses.push(assignment.course.title);
+      }
+    });
+
+    // Convert map to array
+    const faculties = Array.from(facultyMap.values());
+
+    res.json({
+      faculties,
+      total: faculties.length
+    });
   } catch (error) {
-    console.error("Error creating faculty:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching faculty members:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// Delete a faculty by UID
-const deleteFacultyByid = async (req, res) => {
-  try {
-    const { id } = req.params;
+module.exports = { getFacultyMembers };
 
-    if (!id) {
-      return res.status(400).json({ message: "ID is required." });
-    }
-
-    const deletedFaculty = await Faculty.findOneAndDelete({ _id: id });
-
-    if (!deletedFaculty) {
-      return res.status(404).json({ message: "Faculty not found." });
-    }
-
-    res.status(200).json({ message: "Faculty deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting faculty:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-
-
-// (Optional) Get all faculties
-const getFaculties = async (req, res) => {
-  try {
-    const faculties = await User.find({ role: 'FACULTY' });
-    res.status(200).json(faculties);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch faculties." });
-  }
-};
-
-module.exports = { createFaculty, getFaculties, deleteFacultyByid };
