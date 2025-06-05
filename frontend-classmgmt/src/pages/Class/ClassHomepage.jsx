@@ -56,16 +56,7 @@ const ClassHomepage = () => {
         </div>
       )}
       
-      {/* Quick Actions */}
-      <div className="mb-6 flex flex-wrap gap-4">
-        <button
-          onClick={() => navigate('/class/timeline')}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-        >
-          <span className="material-icons">timeline</span>
-          View Class Timeline
-        </button>
-      </div>
+
 
       {photoUrl && (
         <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover mb-4" />

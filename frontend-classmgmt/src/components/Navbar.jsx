@@ -12,7 +12,9 @@ import {
   FaBars,
   FaTimes,
   FaChevronDown,
-  FaCog
+  FaCog,
+  FaCalendarAlt,
+  FaChalkboardTeacher
 } from 'react-icons/fa';
 
 const Navbar = () => {
@@ -82,6 +84,14 @@ const Navbar = () => {
         <Link to="/dashboard" className={baseClass('/dashboard')} onClick={() => setIsOpen(false)}>
           <FaTachometerAlt className="h-4 w-4" />
           <span>Dashboard</span>
+        </Link>
+        <Link to="/class/home" className={baseClass('/class/home')} onClick={() => setIsOpen(false)}>
+          <FaChalkboardTeacher className="h-4 w-4" />
+          <span>Class Home</span>
+        </Link>
+        <Link to="/class/timeline" className={baseClass('/class/timeline')} onClick={() => setIsOpen(false)}>
+          <FaCalendarAlt className="h-4 w-4" />
+          <span>Class Timeline</span>
         </Link>
         <Link to="/notices" className={baseClass('/notices')} onClick={() => setIsOpen(false)}>
           <FaBell className="h-4 w-4" />
