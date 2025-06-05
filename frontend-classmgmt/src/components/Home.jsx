@@ -41,7 +41,6 @@ const Home = () => {
       <section>
         <h3 className="text-xl font-semibold text-purple-700">🧑‍🏫 Faculties</h3>
         <ul className="list-disc list-inside space-y-1 mt-2">
-          <li><Link to="/faculties/register" className="text-blue-600 hover:underline">Register Faculty</Link></li>
         </ul>
       </section>
 
