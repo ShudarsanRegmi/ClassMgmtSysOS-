@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import StudentList from './StudentList';
 import CRList from './CRList';
+import FacultyList from './FacultyList';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,11 +57,11 @@ const ClassHomepage = () => {
         </div>
       )}
       
-
-
       {photoUrl && (
-        <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover mb-4" />
+        <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover rounded-lg shadow-lg mb-6" />
       )}
+
+      <FacultyList classId={classId} />
       <CRList classId={classId} />
       <StudentList classId={classId} />
       <footer className="mt-8 text-center text-gray-500">
