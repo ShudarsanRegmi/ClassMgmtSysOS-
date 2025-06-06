@@ -1,8 +1,8 @@
 const User = require('../models/User');
-const { userProfileDto, userListDto } = require('../dtos/user.dto'); // adjust path as needed
+const { userProfileDto, userListDto } = require('../dtos/user.dto');
 
 const check = async(req, res) => {
-    return res.status(200).json({message: 'Hello from the check route. You\'re authorized..'});
+    return res.status(200).json({message: 'Hello from the check route. You\'re authenticated..'});
 }
 
 
@@ -12,8 +12,6 @@ const fs = require('fs');
 
 
 const completeProfile = async (req, res) => {
-  console.log("Completing profile...");
-
   try {
     const uid = req.user?.uid;
     if (!uid) return res.status(400).json({ error: "User UID is missing or invalid." });
@@ -27,7 +25,6 @@ const completeProfile = async (req, res) => {
 
     // Handle profile photo upload
     if (req.file) {
-      console.log("Uploading profile photo to Cloudinary...");
       const cloudinaryResult = await uploadToCloudinary(req.file.path, 'profile_photos');
       console.log("Cloudinary upload result:", cloudinaryResult);
 
