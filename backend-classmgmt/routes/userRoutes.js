@@ -116,13 +116,11 @@
 
 
 const express = require('express');
-
 const router = express.Router();
 
 
 const {
     completeProfile,
-    updateUserRole, 
     getAllUsers,
     getUsersByType,
     check,
@@ -139,16 +137,25 @@ const upload = require('../middleware/uploadMiddleware');
 // full paths /api
 
 router.get('/check', verifyToken, check);
-// router.post("/complete-profile", verifyToken, completeProfile);
+
+// Used By: /profile-form
 router.post('/complete-profile', verifyToken, upload.single('profilePhoto'), completeProfile);
+
+// Used By: /profile
 router.get('/profile', verifyToken, getUserProfile);
 
-router.get('/getUsersByType', getUsersByType);
-router.get('/getAllUsers', verifyToken, getAllUsers);
-router.get('/getUserByUid/:uid', verifyToken, getUserByUid);
+
+router.get('/getUsersByType', getUsersByType); // this can also return student list of particular class
 
 router.get('/class/:classId/students', userController.getStudentsByClass);
+
 router.get('/class/:classId/crs', userController.getCRsByClass);
+
+
+
+// Super Admin Routes
+router.get('/getAllUsers', verifyToken, getAllUsers);
+router.get('/getUserByUid/:uid', verifyToken, getUserByUid);
 
 
 

@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const admin = require('./firebaseAdmin');
 const userRouter = require('./routes/userRoutes')
 const fileRoutes = require('./routes/fileRoutes');
+// I could not understand, why not having this is making firebause auth to fail although it's not being used
+const admin = require('./firebaseAdmin');
 const crRoutes = require('./routes/crRoutes');
 const classRoutes = require('./routes/classRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
@@ -28,7 +29,6 @@ require('dotenv').config();
 // Connect to DB
 connectDB();
 
-const verifyToken = require('./middleware/authmiddleware'); // Todo: To confirm that this modularization works fine
 
 const app = express();
 app.use(bodyParser.json());
