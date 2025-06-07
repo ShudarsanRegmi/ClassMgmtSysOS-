@@ -37,8 +37,12 @@ app.use(cors());
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
+// swagger api configuration
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+
+// Later it might be mapped to : /api/user
 app.use('/api/', userRouter); 
 app.use('/api/files/', fileRoutes);
 app.use('/api/cr', crRoutes);
