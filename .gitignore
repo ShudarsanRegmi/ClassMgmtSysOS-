@@ -8,6 +8,7 @@ frontend-classmgmt/.env
 cypress.env.json
 backend-classmgmt/uploads/
 .vscode
+SECRET.txt
 
 # React Component Preview
 previewConfig.json
