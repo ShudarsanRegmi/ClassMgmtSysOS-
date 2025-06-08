@@ -8,6 +8,9 @@ const facultyController = require('../controllers/facultyController');
 // /api/faculties/getFaculties
 
 
+
+
+// Used in: CourseAssignmentForm.jsx to show the list of available faculties
 router.get('/getAllFaculties', facultyController.getFaculties); // for dropdown in frontend
 
 

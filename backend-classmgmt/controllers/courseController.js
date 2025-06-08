@@ -175,9 +175,47 @@ const getCourseById = async (req, res) => {
     }
 };
 
+// Delete Course
+const deleteCourse = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if course exists
+        const course = await Course.findById(id);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        // Check if course is assigned to any semester
+        const courseAssignments = await CourseAssignment.find({ course: id });
+        if (courseAssignments.length > 0) {
+            return res.status(400).json({ 
+                message: "Cannot delete course as it is assigned to one or more semesters" 
+            });
+        }
+
+        // Delete the course
+        await Course.findByIdAndDelete(id);
+        
+        res.status(200).json({ 
+            success: true,
+            message: "Course deleted successfully" 
+        });
+
+    } catch (error) {
+        console.error("Error deleting course:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Internal server error",
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     createCourse,
     getAllCourses,
     getSemesterCourses,
-    getCourseById
+    getCourseById,
+    deleteCourse
 };
