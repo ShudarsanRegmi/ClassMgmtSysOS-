@@ -18,6 +18,26 @@ const ProfileForm = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [classes, setClasses] = useState([]);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false);
+
+  // Fetch classes when component mounts
+  useEffect(() => {
+    const fetchClasses = async () => {
+      setIsLoadingClasses(true);
+      try {
+        const response = await api.get('/class/getAllClasses');
+        setClasses(response.data);
+      } catch (err) {
+        console.error("Error fetching classes:", err);
+        setError("Failed to load classes. Please try again later.");
+      } finally {
+        setIsLoadingClasses(false);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   // Update form if userProfile changes
   useEffect(() => {
@@ -174,17 +194,26 @@ const ProfileForm = () => {
         {/* Class ID Input (Conditional) */}
         {formData.role !== "FACULTY" && (
           <div className="space-y-1">
-            <label htmlFor="classId" className="text-sm font-medium text-gray-700">Class ID</label>
-            <input
+            <label htmlFor="classId" className="text-sm font-medium text-gray-700">Class</label>
+            <select
               id="classId"
               name="classId"
-              type="text"
-              placeholder="Enter your class ID"
               className="w-full border border-gray-300 rounded-md p-3"
               value={formData.classId}
               onChange={handleChange}
               required
-            />
+              disabled={isLoadingClasses}
+            >
+              <option value="">Select a class</option>
+              {classes.map((classItem) => (
+                <option key={classItem._id} value={classItem.classId}>
+                  {classItem.name} ({classItem.classId}) - {classItem.department} Year {classItem.year} Section {classItem.section}
+                </option>
+              ))}
+            </select>
+            {isLoadingClasses && (
+              <p className="text-sm text-gray-500 mt-1">Loading classes...</p>
+            )}
           </div>
         )}
 
