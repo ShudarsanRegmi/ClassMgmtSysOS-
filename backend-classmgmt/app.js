@@ -8,6 +8,7 @@ const crRoutes = require('./routes/crRoutes');
 const classRoutes = require('./routes/classRoutes');
 const semesterRoutes = require('./routes/semesterRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const facultyRoutes = require('./routes/facultyRoutes');
 const settingsRoutes = require('./routes/systemSettingsRoutes');
 const assignmentRoutes = require('./routes/courseAssignment');
 const noticeRoutes = require('./routes/noticeRoutes');
@@ -51,6 +52,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 app.use('/api/notices', noticeRoutes);  
 app.use('/api/materials', courseMaterialRoutes);
+
+app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);
 app.use('/api/admin/settings', settingsRoutes);
 app.use('/api/events', eventRoutes);
