@@ -11,9 +11,13 @@ import {
     Chip, 
     IconButton,
     Alert,
-    Snackbar
+    Snackbar,
+    Paper,
+    Divider,
+    Avatar,
+    useTheme
 } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -30,6 +34,7 @@ const NoticeBoard = () => {
         userId,
         userName
     } = useAuth();
+    const theme = useTheme();
 
     useEffect(() => {
         console.log('Auth State:', {
@@ -98,10 +103,8 @@ const NoticeBoard = () => {
     };
 
     const checkPermissions = (notice) => {
-        // Check if user is the author of the notice
         const isAuthor = notice.author === userId;
         
-        // Log permission check details
         console.log('Permission check:', {
             noticeId: notice._id,
             noticeAuthor: notice.author,
@@ -114,34 +117,96 @@ const NoticeBoard = () => {
 
     if (loading) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Typography>Loading notices...</Typography>
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                minHeight: '200px',
+                p: 3
+            }}>
+                <Typography variant="body1" color="text.secondary">
+                    Loading notices...
+                </Typography>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Paper 
+            elevation={0} 
+            sx={{ 
+                p: 4, 
+                borderRadius: 4,
+                background: theme.palette.mode === 'dark' 
+                    ? 'linear-gradient(180deg, rgba(30,30,30,0.8) 0%, rgba(45,45,45,0.8) 100%)' 
+                    : 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(245,245,245,0.9) 100%)',
+                backdropFilter: 'blur(8px)',
+                border: theme.palette.mode === 'dark' 
+                    ? '1px solid rgba(255, 255, 255, 0.12)' 
+                    : '1px solid rgba(0, 0, 0, 0.12)'
+            }}
+        >
             <Snackbar 
                 open={!!error} 
                 autoHideDuration={6000} 
                 onClose={handleCloseError}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+                <Alert 
+                    onClose={handleCloseError} 
+                    severity="error" 
+                    sx={{ 
+                        width: '100%',
+                        boxShadow: theme.shadows[4]
+                    }}
+                >
                     {error}
                 </Alert>
             </Snackbar>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Typography variant="h4" component="h1">
-                    Notice Board
-                </Typography>
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 4,
+                flexWrap: 'wrap',
+                gap: 2
+            }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ 
+                        bgcolor: theme.palette.primary.main,
+                        width: 56, 
+                        height: 56
+                    }}>
+                        <NotificationsIcon fontSize="large" />
+                    </Avatar>
+                    <Typography variant="h4" component="h1" sx={{ 
+                        fontWeight: 700,
+                        background: theme.palette.mode === 'dark'
+                            ? 'linear-gradient(90deg, #ffffff, #bbbbbb)'
+                            : 'linear-gradient(90deg, #1976d2, #5e92f3)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        Notice Board
+                    </Typography>
+                </Box>
                 {currentUser && (
                     <Button
                         variant="contained"
                         color="primary"
                         onClick={() => navigate('/notices/create')}
+                        sx={{
+                            borderRadius: 20,
+                            px: 4,
+                            py: 1,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: theme.shadows[2],
+                            '&:hover': {
+                                boxShadow: theme.shadows[4]
+                            }
+                        }}
                     >
                         Create Notice
                     </Button>
@@ -149,9 +214,18 @@ const NoticeBoard = () => {
             </Box>
 
             {notices.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Box sx={{ 
+                    textAlign: 'center', 
+                    py: 6,
+                    border: `1px dashed ${theme.palette.divider}`,
+                    borderRadius: 4,
+                    background: theme.palette.background.paper
+                }}>
                     <Typography variant="h6" color="textSecondary">
                         No notices available
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                        Be the first to create one!
                     </Typography>
                 </Box>
             ) : (
@@ -162,51 +236,111 @@ const NoticeBoard = () => {
                         
                         return (
                             <Grid item xs={12} key={notice._id}>
-                                <Card>
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Card sx={{
+                                    borderRadius: 3,
+                                    boxShadow: theme.shadows[2],
+                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: theme.shadows[6]
+                                    },
+                                    background: theme.palette.background.paper
+                                }}>
+                                    <CardContent sx={{ p: 3 }}>
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            alignItems: 'flex-start',
+                                            mb: 2
+                                        }}>
                                             <Box>
-                                                <Typography variant="h6" component="h2">
+                                                <Typography variant="h5" component="h2" sx={{ 
+                                                    fontWeight: 600,
+                                                    mb: 1
+                                                }}>
                                                     {notice.title}
                                                 </Typography>
-                                                <Typography color="textSecondary" gutterBottom>
-                                                    Posted by {notice.authorName || 'Unknown'} on {new Date(notice.createdAt).toLocaleDateString()}
-                                                </Typography>
+                                                <Box sx={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    mb: 1
+                                                }}>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Posted by {notice.authorName || 'Unknown'}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        • {new Date(notice.createdAt).toLocaleDateString()}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
-                                            <Box>
+                                            <Box sx={{ display: 'flex', gap: 1 }}>
                                                 <Chip
                                                     label={notice.priority}
                                                     color={getPriorityColor(notice.priority)}
                                                     size="small"
-                                                    sx={{ mr: 1 }}
+                                                    sx={{ 
+                                                        fontWeight: 600,
+                                                        textTransform: 'capitalize'
+                                                    }}
                                                 />
                                                 <Chip
                                                     label={notice.targetAudience}
                                                     variant="outlined"
                                                     size="small"
+                                                    sx={{
+                                                        fontWeight: 500,
+                                                        textTransform: 'capitalize'
+                                                    }}
                                                 />
                                             </Box>
                                         </Box>
                                         
-                                        <Typography variant="body1" sx={{ mt: 2 }}>
+                                        <Divider sx={{ my: 2 }} />
+                                        
+                                        <Typography variant="body1" sx={{ 
+                                            mt: 2,
+                                            lineHeight: 1.6,
+                                            color: theme.palette.text.primary
+                                        }}>
                                             {notice.content}
                                         </Typography>
 
                                         {canEdit && (
-                                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                                                <IconButton
+                                            <Box sx={{ 
+                                                mt: 3, 
+                                                display: 'flex', 
+                                                justifyContent: 'flex-end',
+                                                gap: 1
+                                            }}>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
                                                     size="small"
+                                                    startIcon={<EditIcon />}
                                                     onClick={() => navigate(`/notices/edit/${notice._id}`)}
+                                                    sx={{
+                                                        borderRadius: 20,
+                                                        px: 2,
+                                                        textTransform: 'none'
+                                                    }}
                                                 >
-                                                    <EditIcon />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
                                                     color="error"
+                                                    size="small"
+                                                    startIcon={<DeleteIcon />}
                                                     onClick={() => handleDelete(notice._id)}
+                                                    sx={{
+                                                        borderRadius: 20,
+                                                        px: 2,
+                                                        textTransform: 'none'
+                                                    }}
                                                 >
-                                                    <DeleteIcon />
-                                                </IconButton>
+                                                    Delete
+                                                </Button>
                                             </Box>
                                         )}
                                     </CardContent>
@@ -218,17 +352,29 @@ const NoticeBoard = () => {
             )}
 
             {totalPages > 1 && (
-                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                <Box sx={{ 
+                    mt: 4, 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    pt: 2,
+                    borderTop: `1px solid ${theme.palette.divider}`
+                }}>
                     <Pagination
                         count={totalPages}
                         page={page}
                         onChange={handlePageChange}
                         color="primary"
+                        shape="rounded"
+                        sx={{
+                            '& .MuiPaginationItem-root': {
+                                fontWeight: 600
+                            }
+                        }}
                     />
                 </Box>
             )}
-        </Box>
+        </Paper>
     );
 };
 
-export default NoticeBoard; 
+export default NoticeBoard;
