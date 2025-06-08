@@ -13,7 +13,9 @@ const {
 } = require('../controllers/courseMaterialController');
 
 router.post('/create', courseController.createCourse);
+router.delete('/:id', verifyToken, courseController.deleteCourse);
 
+// Used in : CourseAssignmentForm.jsx to show the list of available courses
 router.get('/getAllCourses', courseController.getAllCourses);
 // router.get('/getFaculties', courseController.getFaculties); // for dropdown in frontend
 

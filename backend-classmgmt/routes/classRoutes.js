@@ -12,6 +12,9 @@ const { getFacultyMembers } = require('../controllers/facultyController');
 // /api/class/getAllClasses - GET
 router.post('/create', upload.single('photo'), classController.createClass);
 router.delete('/delete/:classId', classController.deleteClassById); // Delete class by ID
+
+// Used in : ProfileForm.jsx to show the list of available classes
+// Used in CourseAssignmentForm.jsx to show the list of available classes
 router.get('/getAllClasses', classController.getAllClasses);
 
 
