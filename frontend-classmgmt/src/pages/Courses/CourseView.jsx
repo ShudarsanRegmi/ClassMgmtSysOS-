@@ -51,6 +51,8 @@ function TabPanel({ children, value, index, ...other }) {
   );
 }
 
+
+// A separate interface to display the infos related to a particular course
 const CourseView = () => {
   const { courseId } = useParams();
   const { currentSemester } = useAuth();

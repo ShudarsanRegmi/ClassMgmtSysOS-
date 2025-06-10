@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import { School, Person, Timer, Visibility } from '@mui/icons-material';
 
+// Used in Dashboard to list the courses for the particular semester 
+
 const SemesterCourses = () => {
   const [courseAssignments, setCourseAssignments] = useState([]);
   const [loading, setLoading] = useState(true);

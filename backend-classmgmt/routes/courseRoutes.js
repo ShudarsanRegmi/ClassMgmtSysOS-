@@ -12,12 +12,14 @@ const {
     getClassStudents
 } = require('../controllers/courseMaterialController');
 
+// Used in : CreateCourse.jsx to submit response
 router.post('/create', courseController.createCourse);
+
+// Used in : CreateCourse.jsx to delete course
 router.delete('/:id', verifyToken, courseController.deleteCourse);
 
 // Used in : CourseAssignmentForm.jsx to show the list of available courses
 router.get('/getAllCourses', courseController.getAllCourses);
-// router.get('/getFaculties', courseController.getFaculties); // for dropdown in frontend
 
 // Get courses for a specific semester
 router.get('/semester/:semesterId', verifyToken, courseController.getSemesterCourses);

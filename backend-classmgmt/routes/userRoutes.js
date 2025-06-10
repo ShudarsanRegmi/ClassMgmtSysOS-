@@ -144,19 +144,24 @@ router.post('/complete-profile', verifyToken, upload.single('profilePhoto'), com
 // Used By: /profile
 router.get('/profile', verifyToken, getUserProfile);
 
+// Used By: CRList.jsx
+// We've dedicated routes for fetching student and faculty list
+router.get('/getUsersByType', getUsersByType); // ?role?classId // this can also return student list of particular class
 
-router.get('/getUsersByType', getUsersByType); // this can also return student list of particular class
 
+// Functionally same as /getUsersByType route but it's more structured
 router.get('/class/:classId/students', userController.getStudentsByClass);
 
 router.get('/class/:classId/crs', userController.getCRsByClass);
 
+// The above two routes seems redundant to the /getUsersByType. I'll find out which api design is good and adopt one in the later revision
 
 
 // Super Admin Routes
 router.get('/getAllUsers', verifyToken, getAllUsers);
 router.get('/getUserByUid/:uid', verifyToken, getUserByUid);
 
+// The above two routes are not direclty used by front end application till now.
 
 
 module.exports = router;
