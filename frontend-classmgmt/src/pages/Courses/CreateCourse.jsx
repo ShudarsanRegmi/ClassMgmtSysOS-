@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { Trash2, ArrowUpDown } from 'lucide-react';
 
+
+// Form to create a new course
 const CreateCourse = () => {
   const [formData, setFormData] = useState({
     title: '',
