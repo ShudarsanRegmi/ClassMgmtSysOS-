@@ -22,6 +22,7 @@ router.delete('/:id', verifyToken, courseController.deleteCourse);
 router.get('/getAllCourses', courseController.getAllCourses);
 
 // Get courses for a specific semester
+// Used in : SemesterCourses.jsx to list the courses for the particular semester (dashboard tab)
 router.get('/semester/:semesterId', verifyToken, courseController.getSemesterCourses);
 
 // Get single course by ID with semester context
