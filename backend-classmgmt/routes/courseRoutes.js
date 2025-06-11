@@ -12,21 +12,32 @@ const {
     getClassStudents
 } = require('../controllers/courseMaterialController');
 
+// Used in : CreateCourse.jsx to submit response
 router.post('/create', courseController.createCourse);
 
+// Used in : CreateCourse.jsx to delete course
+router.delete('/:id', verifyToken, courseController.deleteCourse);
+
+// Used in : CourseAssignmentForm.jsx to show the list of available courses
 router.get('/getAllCourses', courseController.getAllCourses);
-// router.get('/getFaculties', courseController.getFaculties); // for dropdown in frontend
 
 // Get courses for a specific semester
+// Used in : SemesterCourses.jsx to list the courses for the particular semester (dashboard tab)
 router.get('/semester/:semesterId', verifyToken, courseController.getSemesterCourses);
 
 // Get single course by ID with semester context
 router.get('/:courseId/semester/:semesterId', verifyToken, courseController.getCourseById);
 
+// -----------------------------------------------------------
+
+// Since all materials will have crud operations, we careated a signle route for all materials and keeping material tyep as path param
 // Course Material Routes
-router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials);
+
+router.get('/:courseId/students', verifyToken, getClassStudents); // Looks duplicate
+
+router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials); // used to fetch all materials for a course for a semester
 router.get('/:courseId/materials/:semesterId/:type', verifyToken, getCourseMaterials);
-router.get('/:courseId/students', verifyToken, getClassStudents);
+
 
 // Handle file uploads based on material type
 router.post('/:courseId/materials/:semesterId/:type', verifyToken, (req, res, next) => {

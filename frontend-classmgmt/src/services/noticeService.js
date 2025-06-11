@@ -1,7 +1,6 @@
 import api from '../utils/api';
 import { auth } from '../firebase';
 
-const API_URL = 'http://localhost:3001/api/notices';
 
 // Helper function to get current user info
 const getCurrentUserInfo = () => {

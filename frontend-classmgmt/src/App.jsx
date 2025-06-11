@@ -16,7 +16,6 @@ import CRDashboard from "./pages/CR/CRDashboard";
 import AddClass from './pages/Class/AddClass';
 import ClassHomepage from "./pages/Class/ClassHomepage";
 import AddSemester from "./pages/Sem/AddSemester";
-import CreateFaculty from "./pages/Faculties/CreateFaculty";
 import CreateCourse from "./pages/Courses/CreateCourse";
 import SemesterCourses from "./pages/Courses/SemesterCourses";
 import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
@@ -115,12 +114,6 @@ function App() {
               <Route path="/sem/add" element={
                 <PrivateRoute>
                   <AddSemester />
-                </PrivateRoute>
-              } />
-              
-              <Route path="/faculties/register" element={
-                <PrivateRoute>
-                  <CreateFaculty />
                 </PrivateRoute>
               } />
               
