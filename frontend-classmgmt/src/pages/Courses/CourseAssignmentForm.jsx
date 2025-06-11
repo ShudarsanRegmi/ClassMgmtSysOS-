@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
+
+// Form for Assinging course to a faculty to a class for a particular semester
 const CourseAssignmentForm = () => {
   const [courses, setCourses] = useState([]);
   const [classes, setClasses] = useState([]);

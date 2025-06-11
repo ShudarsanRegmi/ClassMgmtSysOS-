@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { Trash2, ArrowUpDown } from 'lucide-react';
 
+
+// Form to create a new course
 const CreateCourse = () => {
   const [formData, setFormData] = useState({
     title: '',
@@ -22,10 +24,11 @@ const CreateCourse = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/courses/getAllCourses');
+      const res = await api.get('/courses/getAllCourses');
       setCourses(res.data);
     } catch (err) {
       console.error("Error fetching courses", err);
+      setMsg("Failed to fetch courses");
     }
   };
 
@@ -40,22 +43,24 @@ const CreateCourse = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/api/courses/create', formData);
+      const response = await api.post('/courses/create', formData);
       setMsg("Course created successfully");
       setFormData({ title: '', code: '', credits: 3 });
       fetchCourses(); // Refresh list
     } catch (err) {
       console.error(err);
-      setMsg("Failed to create course");
+      setMsg(err.response?.data?.message || "Failed to create course");
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/api/courses/${id}`);
+      await api.delete(`/courses/${id}`);
+      setMsg("Course deleted successfully");
       fetchCourses();
     } catch (err) {
       console.error("Delete failed", err);
+      setMsg(err.response?.data?.message || "Failed to delete course");
     }
   };
 

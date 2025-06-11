@@ -44,6 +44,8 @@ import MaterialsTab from './CourseContent/MaterialsTab';
 import SharedNotesTab from './CourseContent/SharedNotesTab';
 import WhiteboardTab from './CourseContent/WhiteboardTab';
 
+
+// Component to display the course specific content
 const StandaloneCourseView = () => {
   const { courseId, semesterId } = useParams();
   const location = useLocation();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { api } from '../../api/api';
 import api from '../../utils/api';
@@ -14,6 +14,7 @@ const AddSemester = () => {
     message: '',
     severity: 'success' // 'error', 'warning', 'info', 'success'
   });
+  const [classes, setClasses] = useState([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -107,6 +108,20 @@ const AddSemester = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await api.get('/class/getAllClasses');
+        setClasses(response.data);
+      } catch (error) {
+        console.error('Error fetching classes:', error);
+        showNotification('Error fetching classes', 'error');
+      }
+    };
+
+    fetchClasses();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-8">
@@ -171,17 +186,22 @@ const AddSemester = () => {
             {/* Class ID */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Class ID
+                Class
               </label>
-              <input
-                type="text"
+              <select
                 name="classId"
-                placeholder="Enter class ID"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={formData.classId}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select a class</option>
+                {classes.map(classItem => (
+                  <option key={classItem._id} value={classItem.classId}>
+                    {classItem.name} ({classItem.classId}) - {classItem.department} Year {classItem.year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Start Date */}

@@ -11,9 +11,11 @@ const {
 } = require('../controllers/semesterController');
 
 // Create a new semester
+// Used in : AddSemester.jsx
 router.post('/create', verifyToken, createSemester);
 
 // Get all semesters for a class
+// Used in : AuthContext.jsx to fetch list of available semesters for a class
 router.get('/class/:classId', verifyToken, getSemestersByClass);
 
 // Get a single semester

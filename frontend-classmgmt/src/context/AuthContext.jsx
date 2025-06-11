@@ -312,24 +312,6 @@ export const AuthProvider = ({ children }) => {
         return userProfile?.role === role;
     };
 
-    // Log whenever auth state or profile changes
-    useEffect(() => {
-        // console.group('🔑 Auth State Update');
-        // console.log('Current State:', {
-        //     timestamp: new Date().toISOString(),
-        //     isAuthenticated: !!currentUser,
-        //     hasProfile: !!userProfile,
-        //     user: extractUserDetails(currentUser),
-        //     profile: userProfile,
-        //     roles: {
-        //         isAdmin: hasRole('ADMIN'),
-        //         isFaculty: hasRole('FACULTY'),
-        //         isStudent: hasRole('STUDENT')
-        //     }
-        // });
-        // console.groupEnd();
-    }, [currentUser, userProfile]);
-
     const value = {
         // User-related information
         currentUser,          // Firebase user object
@@ -369,44 +351,7 @@ export const AuthProvider = ({ children }) => {
     console.group('🔄 Auth Context Value (Exported)');
     console.log('Context Value:', value);
     console.groupEnd();
-
-    // Log the complete combined object
-    // console.group('📚 Complete Auth Context');
-    // console.log('Combined State:', {
-    //     // User & Auth
-    //     user: {
-    //         id: value.userId,
-    //         email: value.userEmail,
-    //         name: value.userName,
-    //         role: value.userRole,
-    //         classId: value.classId,
-    //         isAuthenticated: value.isAuthenticated,
-    //         isProfileComplete: value.isProfileComplete,
-    //         permissions: {
-    //             isAdmin: value.isAdmin,
-    //             isFaculty: value.isFaculty,
-    //             isStudent: value.isStudent
-    //         }
-    //     },
-    //     // Profile Details
-    //     profile: value.userProfile,
-    //     // Firebase Details
-    //     firebase: extractUserDetails(value.currentUser),
-    //     // Semester Information
-    //     semester: {
-    //         current: value.semesterInfo,
-    //         available: value.availableSemesters,
-    //         hasSemester: !!value.currentSemester,
-    //         totalSemesters: value.availableSemesters?.length || 0
-    //     },
-    //     // System State
-    //     system: {
-    //         loading: value.loading,
-    //         error: value.error,
-    //         timestamp: new Date().toISOString()
-    //     }
-    // });
-    // console.groupEnd();
+    
 
     return (
         <AuthContext.Provider value={value}>
