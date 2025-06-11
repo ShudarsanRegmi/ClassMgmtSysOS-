@@ -51,7 +51,7 @@ app.use('/api/class', classRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 app.use('/api/notices', noticeRoutes);  
-app.use('/api/materials', courseMaterialRoutes);
+app.use('/api/materials', courseMaterialRoutes); // courseRoute was used instead of this..
 
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);
