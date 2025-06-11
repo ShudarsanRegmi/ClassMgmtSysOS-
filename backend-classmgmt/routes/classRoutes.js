@@ -17,8 +17,7 @@ router.post('/create', upload.single('photo'), classController.createClass);
 // Used in : 
 router.delete('/delete/:classId', classController.deleteClassById); // Delete class by ID
 
-// Used in : ProfileForm.jsx to show the list of available classes
-// Used in CourseAssignmentForm.jsx to show the list of available classes
+// Used in : ProfileForm.jsx, CourseAssignment.jsx, Addsemester.jsx to show the list of available classes
 router.get('/getAllClasses', classController.getAllClasses);
 
 
