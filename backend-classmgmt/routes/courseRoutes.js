@@ -28,10 +28,16 @@ router.get('/semester/:semesterId', verifyToken, courseController.getSemesterCou
 // Get single course by ID with semester context
 router.get('/:courseId/semester/:semesterId', verifyToken, courseController.getCourseById);
 
+// -----------------------------------------------------------
+
+// Since all materials will have crud operations, we careated a signle route for all materials and keeping material tyep as path param
 // Course Material Routes
-router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials);
+
+router.get('/:courseId/students', verifyToken, getClassStudents); // Looks duplicate
+
+router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials); // used to fetch all materials for a course for a semester
 router.get('/:courseId/materials/:semesterId/:type', verifyToken, getCourseMaterials);
-router.get('/:courseId/students', verifyToken, getClassStudents);
+
 
 // Handle file uploads based on material type
 router.post('/:courseId/materials/:semesterId/:type', verifyToken, (req, res, next) => {
