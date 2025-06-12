@@ -9,6 +9,6 @@ router.post('/assign', createCourseAssignment);
 
 // Get assigned courses for a class
 // /api/assignments/class/:classId
-router.get('/class/:classId', getAssignedCourses);
+router.get('/class/:classId/:currentSemester', getAssignedCourses);
 
 module.exports = router;
