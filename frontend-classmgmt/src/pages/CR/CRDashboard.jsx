@@ -14,7 +14,9 @@ import {
     Slide,
     Button,
     useTheme,
-    CardActionArea
+    CardActionArea,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import {
     Close as CloseIcon,
@@ -22,13 +24,15 @@ import {
     Upload as UploadIcon,
     Collections as CollectionsIcon,
     Book as BookIcon,
-    Announcement as AnnouncementIcon
+    Announcement as AnnouncementIcon,
+    AccessTime as AccessTimeIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import AssetCard from './compos/AssetCard';
 import AssignedCourses from '../../components/AssignedCourses';
 import SemesterAssetForm from '../../components/SemesterAssetForm';
 import NoticeForm from '../../components/NoticeForm';
+import CRDeadlineForm from '../../components/CRDeadlineForm';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -52,9 +56,31 @@ const CRDashboard = () => {
     const [dialogContent, setDialogContent] = useState(null);
     const [dialogTitle, setDialogTitle] = useState('');
 
+    // Toast state
+    const [toast, setToast] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
     useEffect(() => {
         fetchAssets();
     }, [userProfile]);
+
+    const handleCloseToast = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setToast({ ...toast, open: false });
+    };
+
+    const showToast = (message, severity = 'success') => {
+        setToast({
+            open: true,
+            message,
+            severity
+        });
+    };
 
     const fetchAssets = async () => {
         try {
@@ -86,6 +112,15 @@ const CRDashboard = () => {
         handleCloseDialog();
     };
 
+    const handleDeadlineSuccess = (deadline) => {
+        handleCloseDialog();
+        showToast('Deadline created successfully');
+    };
+
+    const handleDeadlineError = (error) => {
+        showToast(error.message || 'Failed to create deadline', 'error');
+    };
+
     const dashboardSections = [
         {
             title: 'Create Notice',
@@ -96,6 +131,19 @@ const CRDashboard = () => {
                 'Create Notice'
             ),
             description: 'Create and publish notices'
+        },
+        {
+            title: 'Create Deadline',
+            icon: <AccessTimeIcon sx={{ fontSize: 40 }} />,
+            color: theme.palette.warning.main,
+            onClick: () => handleOpenDialog(
+                <CRDeadlineForm 
+                    onSubmitSuccess={handleDeadlineSuccess}
+                    onError={handleDeadlineError}
+                />,
+                'Create Deadline'
+            ),
+            description: 'Create deadlines for assignments and exams'
         },
         {
             title: 'Assigned Courses',
@@ -209,6 +257,23 @@ const CRDashboard = () => {
                     {dialogContent}
                 </Box>
             </Dialog>
+
+            {/* Toast Notification */}
+            <Snackbar
+                open={toast.open}
+                autoHideDuration={6000}
+                onClose={handleCloseToast}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseToast}
+                    severity={toast.severity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {toast.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
