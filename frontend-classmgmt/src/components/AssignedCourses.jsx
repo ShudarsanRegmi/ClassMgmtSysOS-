@@ -16,7 +16,7 @@ const AssignedCourses = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const { userProfile } = useAuth();
+    const { userProfile, classId, currentSemester } = useAuth();
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -25,7 +25,8 @@ const AssignedCourses = () => {
                 setError('');
                 
                 // Get assigned courses for the class
-                const response = await api.get(`/assignments/class/${userProfile.classId}`);
+                const response = await api.get(`/assignments/class/${classId}/${currentSemester.id}`);
+                console.log("response", response);
                 setCourses(response.data);
             } catch (error) {
                 console.error('Error fetching courses:', error);

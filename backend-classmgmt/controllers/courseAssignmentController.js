@@ -2,6 +2,7 @@ const CourseAssignment = require('../models/CourseAssignment');
 const Course = require('../models/Course');
 const Class = require('../models/Class');
 const User = require('../models/User');
+const Semester = require('../models/Semester');
 
 exports.createCourseAssignment = async (req, res) => {
   try {
@@ -98,21 +99,24 @@ exports.createCourseAssignment = async (req, res) => {
 // Get assigned courses for a class in current semester
 exports.getAssignedCourses = async (req, res) => {
     try {
-        const { classId } = req.params;
+        const { classId, currentSemester } = req.params;
+        console.log("-----------------------");
+        console.log('classId', classId);
         
-        // Get class details to access current semester
-        const classDetails = await Class.findOne({ classId: classId })
-            .populate('currentSemester')
-            .select('currentSemester _id');
-
-        if (!classDetails || !classDetails.currentSemester) {
-            return res.status(404).json({ message: 'Class or current semester not found' });
+        // First get the class document using classId string
+        const classDetails = await Class.findOne({ classId: classId });
+        if (!classDetails) {
+            return res.status(404).json({ message: 'Class not found' });
         }
 
-        // Find all course assignments for this class and semester
+        console.log("classDetails", classDetails);
+
+        
+
+        // Find all course assignments for this class and semester using semester _id
         const assignments = await CourseAssignment.find({
-            class: classDetails._id, // Use the MongoDB _id we got from classDetails
-            semester: classDetails.currentSemester.semcode
+            class: classDetails._id,
+            semester: currentSemester
         })
         .populate('course', 'code title credits')
         .populate('faculty', 'name email photoUrl')
