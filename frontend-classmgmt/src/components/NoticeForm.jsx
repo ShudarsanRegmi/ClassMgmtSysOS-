@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     TextField,
@@ -15,34 +15,38 @@ import {
     CircularProgress
 } from '@mui/material';
 import { createNotice, getNotice, updateNotice } from '../services/noticeService';
-import { useAuth } from '../context/AuthContext';
 
-const NoticeForm = () => {
+const NoticeForm = ({ 
+    noticeId = null,  // For editing existing notice
+    onSuccess,        // Callback after successful submission
+    onCancel,         // Optional cancel callback
+    defaultValues,    // Optional default values
+    hideTargetAudience = false, // Option to hide target audience field
+    disableRedirect = false // New prop to control redirection
+}) => {
     const navigate = useNavigate();
-    const { id } = useParams();
-    const { userProfile } = useAuth();
-    
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         targetAudience: 'all',
-        priority: 'medium'
+        priority: 'medium',
+        ...defaultValues
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        if (id) {
+        if (noticeId) {
             fetchNotice();
         }
-    }, [id]);
+    }, [noticeId]);
 
     const fetchNotice = async () => {
         try {
             setLoading(true);
             setError('');
-            const notice = await getNotice(id);
+            const notice = await getNotice(noticeId);
             setFormData({
                 title: notice.title,
                 content: notice.content,
@@ -96,20 +100,30 @@ const NoticeForm = () => {
             setLoading(true);
             setError('');
             
-            // Log the form data being sent
-            console.log('Submitting form data:', formData);
+            console.group('📤 Notice Form Submission');
+            console.log('Notice ID:', noticeId);
+            console.log('Form Data:', formData);
+            console.groupEnd();
 
-            if (id) {
-                await updateNotice(id, formData);
+            let result;
+            if (noticeId) {
+                result = await updateNotice(noticeId, formData);
                 setSuccess('Notice updated successfully!');
             } else {
-                await createNotice(formData);
+                result = await createNotice(formData);
                 setSuccess('Notice created successfully!');
             }
             
-            setTimeout(() => {
-                navigate('/notices');
-            }, 1500);
+            if (onSuccess) {
+                onSuccess(result);
+            }
+
+            // Add delay before navigation
+            if (!disableRedirect) {
+                setTimeout(() => {
+                    navigate('/notices');
+                }, 1500);
+            }
         } catch (error) {
             console.error('Error saving notice:', error);
             if (error.response?.status === 403) {
@@ -119,6 +133,7 @@ const NoticeForm = () => {
             } else {
                 setError('Error saving notice. Please try again later.');
             }
+        } finally {
             setLoading(false);
         }
     };
@@ -137,7 +152,7 @@ const NoticeForm = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box>
             <Snackbar 
                 open={!!error} 
                 autoHideDuration={6000} 
@@ -162,7 +177,7 @@ const NoticeForm = () => {
 
             <Paper sx={{ p: 3 }}>
                 <Typography variant="h5" component="h1" gutterBottom>
-                    {id ? 'Edit Notice' : 'Create Notice'}
+                    {noticeId ? 'Edit Notice' : 'Create Notice'}
                 </Typography>
 
                 <form onSubmit={handleSubmit}>
@@ -194,21 +209,23 @@ const NoticeForm = () => {
                         helperText={error && !formData.content.trim() ? 'Content is required' : ''}
                     />
 
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Target Audience</InputLabel>
-                        <Select
-                            name="targetAudience"
-                            value={formData.targetAudience}
-                            onChange={handleChange}
-                            label="Target Audience"
-                            disabled={loading}
-                        >
-                            <MenuItem value="all">All</MenuItem>
-                            <MenuItem value="students">Students</MenuItem>
-                            <MenuItem value="teachers">Teachers</MenuItem>
-                            <MenuItem value="staff">Staff</MenuItem>
-                        </Select>
-                    </FormControl>
+                    {!hideTargetAudience && (
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Target Audience</InputLabel>
+                            <Select
+                                name="targetAudience"
+                                value={formData.targetAudience}
+                                onChange={handleChange}
+                                label="Target Audience"
+                                disabled={loading}
+                            >
+                                <MenuItem value="all">All</MenuItem>
+                                <MenuItem value="students">Students</MenuItem>
+                                <MenuItem value="teachers">Teachers</MenuItem>
+                                <MenuItem value="staff">Staff</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
 
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Priority</InputLabel>
@@ -231,20 +248,24 @@ const NoticeForm = () => {
                             variant="contained"
                             color="primary"
                             disabled={loading}
+                            fullWidth
                         >
                             {loading ? (
                                 <CircularProgress size={24} color="inherit" />
                             ) : (
-                                id ? 'Update Notice' : 'Create Notice'
+                                noticeId ? 'Update Notice' : 'Create Notice'
                             )}
                         </Button>
-                        <Button
-                            variant="outlined"
-                            onClick={() => navigate('/notices')}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </Button>
+                        {onCancel && (
+                            <Button
+                                variant="outlined"
+                                onClick={onCancel}
+                                disabled={loading}
+                                fullWidth
+                            >
+                                Cancel
+                            </Button>
+                        )}
                     </Box>
                 </form>
             </Paper>
