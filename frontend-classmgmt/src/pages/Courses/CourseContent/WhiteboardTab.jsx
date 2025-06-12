@@ -4,10 +4,8 @@ import {
   Typography,
   Button,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Grid,
   Card,
   CardContent,
@@ -15,7 +13,6 @@ import {
   IconButton,
   Divider,
   MobileStepper,
-  Paper,
   Fade,
 } from '@mui/material';
 import {
@@ -25,98 +22,22 @@ import {
   Download,
   KeyboardArrowLeft,
   KeyboardArrowRight,
-  CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
 import { useAuth } from '../../../context/AuthContext';
 import api from '../../../utils/api';
 import { useTheme } from '@mui/material/styles';
+import WhiteboardShotForm from '../../../components/WhiteboardShotForm';
 
 const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
-  const { user, userRole } = useAuth();
+  const { userProfile } = useAuth();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    topic: '',
-    lectureDate: dayjs(),
-  });
-  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleClickOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    setFormData({
-      title: '',
-      topic: '',
-      lectureDate: dayjs(),
-    });
-    setSelectedFiles([]);
-  };
-
-  const handleFileChange = (event) => {
-    const files = Array.from(event.target.files);
-    const validFiles = files.filter(file => file.type.startsWith('image/'));
-    
-    if (validFiles.length !== files.length) {
-      alert('Some files were skipped as they are not images');
-    }
-
-    if (validFiles.length > 0) {
-      setSelectedFiles(prevFiles => [...prevFiles, ...validFiles]);
-    }
-  };
-
-  const removeFile = (index) => {
-    setSelectedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (selectedFiles.length === 0) {
-      alert('Please select at least one image');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('topic', formData.topic);
-      formDataToSend.append('lectureDate', formData.lectureDate.toISOString());
-      
-      // Append all files
-      selectedFiles.forEach((file, index) => {
-        formDataToSend.append('files', file);
-      });
-
-      const response = await api.post(
-        `/courses/${courseId}/materials/${semesterId}/whiteboard`,
-        formDataToSend,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      if (onShotUpdate) {
-        onShotUpdate([...shots, response.data.data]);
-      }
-      
-      handleClose();
-    } catch (error) {
-      console.error('Error uploading whiteboard shot:', error);
-      alert('Error uploading whiteboard shot. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleClose = () => setOpen(false);
 
   const handleDelete = async (shotId) => {
     if (!window.confirm('Are you sure you want to delete this whiteboard shot?')) return;
@@ -132,7 +53,6 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
   };
 
   const handlePreview = (shot) => {
-    // Handle both array of file objects and single fileUrl
     const images = Array.isArray(shot.files) 
       ? shot.files.map(file => file.url || file) 
       : [shot.fileUrl];
@@ -167,7 +87,6 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleClickOpen}
-          disabled={loading}
         >
           Add Shot
         </Button>
@@ -245,7 +164,7 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
                         >
                           <Download />
                         </IconButton>
-                        {(userRole === 'FACULTY' || userRole === 'CA') && (
+                        {(userProfile.role === 'FACULTY' || userProfile.role === 'CA') && (
                           <IconButton
                             size="small"
                             color="error"
@@ -264,102 +183,20 @@ const WhiteboardTab = ({ shots = [], courseId, semesterId, onShotUpdate }) => {
         ))}
 
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Whiteboard Shot</DialogTitle>
         <DialogContent>
-          <Box component="form" noValidate sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              margin="normal"
-              required
-              disabled={loading}
-            />
-            <TextField
-              fullWidth
-              label="Topic"
-              value={formData.topic}
-              onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              margin="normal"
-              required
-              disabled={loading}
-            />
-            <DatePicker
-              label="Lecture Date"
-              value={formData.lectureDate}
-              onChange={(newValue) => setFormData({ ...formData, lectureDate: newValue })}
-              sx={{ mt: 2, width: '100%' }}
-              disabled={loading}
-              format="DD/MM/YYYY"
-              slotProps={{
-                textField: {
-                  required: true,
-                  margin: "normal"
-                }
-              }}
-            />
-            <Box sx={{ mt: 2 }}>
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                startIcon={<CloudUploadIcon />}
-                disabled={loading}
-              >
-                Add Images
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  disabled={loading}
-                />
-              </Button>
-            </Box>
-            {selectedFiles.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Selected Files ({selectedFiles.length}):
-                </Typography>
-                <Grid container spacing={1}>
-                  {selectedFiles.map((file, index) => (
-                    <Grid item xs={12} key={index}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        sx={{ p: 1, bgcolor: 'background.paper', borderRadius: 1 }}
-                      >
-                        <Typography variant="body2" noWrap sx={{ flex: 1 }}>
-                          {file.name}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => removeFile(index)}
-                          disabled={loading}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            )}
-          </Box>
+          <WhiteboardShotForm
+            courseId={courseId}
+            semesterId={semesterId}
+            classId={userProfile?.classId}
+            onSuccess={(newShot) => {
+              if (onShotUpdate) {
+                onShotUpdate([...shots, newShot]);
+              }
+              handleClose();
+            }}
+            onCancel={handleClose}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>Cancel</Button>
-          <Button 
-            onClick={handleSubmit} 
-            variant="contained" 
-            disabled={loading || !formData.title || !formData.topic || selectedFiles.length === 0 || !formData.lectureDate}
-          >
-            {loading ? 'Uploading...' : 'Upload'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       <Dialog
