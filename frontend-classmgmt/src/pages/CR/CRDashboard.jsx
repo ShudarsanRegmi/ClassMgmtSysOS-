@@ -21,12 +21,14 @@ import {
     Class as ClassIcon,
     Upload as UploadIcon,
     Collections as CollectionsIcon,
-    Book as BookIcon
+    Book as BookIcon,
+    Announcement as AnnouncementIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import AssetCard from './compos/AssetCard';
 import AssignedCourses from '../../components/AssignedCourses';
 import SemesterAssetForm from '../../components/SemesterAssetForm';
+import NoticeForm from '../../components/NoticeForm';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -80,7 +82,21 @@ const CRDashboard = () => {
         setDialogTitle('');
     };
 
+    const handleNoticeSuccess = () => {
+        handleCloseDialog();
+    };
+
     const dashboardSections = [
+        {
+            title: 'Create Notice',
+            icon: <AnnouncementIcon sx={{ fontSize: 40 }} />,
+            color: theme.palette.info.main,
+            onClick: () => handleOpenDialog(
+                <NoticeForm onSubmitSuccess={handleNoticeSuccess} />,
+                'Create Notice'
+            ),
+            description: 'Create and publish notices'
+        },
         {
             title: 'Assigned Courses',
             icon: <BookIcon sx={{ fontSize: 40 }} />,
