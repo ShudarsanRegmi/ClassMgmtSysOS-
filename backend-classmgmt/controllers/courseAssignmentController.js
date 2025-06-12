@@ -94,3 +94,33 @@ exports.createCourseAssignment = async (req, res) => {
     });
   }
 };
+
+// Get assigned courses for a class in current semester
+exports.getAssignedCourses = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        
+        // Get class details to access current semester
+        const classDetails = await Class.findOne({ classId: classId })
+            .populate('currentSemester')
+            .select('currentSemester _id');
+
+        if (!classDetails || !classDetails.currentSemester) {
+            return res.status(404).json({ message: 'Class or current semester not found' });
+        }
+
+        // Find all course assignments for this class and semester
+        const assignments = await CourseAssignment.find({
+            class: classDetails._id, // Use the MongoDB _id we got from classDetails
+            semester: classDetails.currentSemester.semcode
+        })
+        .populate('course', 'code title credits')
+        .populate('faculty', 'name email photoUrl')
+        .select('course faculty section');
+
+        res.status(200).json(assignments);
+    } catch (error) {
+        console.error('Error in getAssignedCourses:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
