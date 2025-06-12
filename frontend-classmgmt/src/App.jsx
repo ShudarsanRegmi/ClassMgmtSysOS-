@@ -24,6 +24,7 @@ import NoticeBoard from './components/NoticeBoard';
 import NoticeForm from './components/NoticeForm';
 import StandaloneCourseView from "./pages/Courses/StandaloneCourseView";
 import ClassPage from "./pages/Class/ClassPage";
+import Schedule from './components/Schedule';
 
 import "./App.css";
 
@@ -57,7 +58,7 @@ function App() {
                   </div>
                 } />
                 <Route path="courses" element={<SemesterCourses />} />
-                <Route path="schedule" element={<div>Schedule Component</div>} />
+                <Route path="schedule" element={<Schedule />} />
                 <Route path="assignments" element={<div>Assignments Component</div>} />
                 <Route path="students" element={<div>Students Component</div>} />
                 <Route path="faculty" element={<div>Faculty Component</div>} />
