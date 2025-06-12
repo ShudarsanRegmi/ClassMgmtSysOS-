@@ -2,6 +2,7 @@ const CourseAssignment = require('../models/CourseAssignment');
 const Course = require('../models/Course');
 const Class = require('../models/Class');
 const User = require('../models/User');
+const Semester = require('../models/Semester');
 
 exports.createCourseAssignment = async (req, res) => {
   try {
@@ -93,4 +94,37 @@ exports.createCourseAssignment = async (req, res) => {
       error: err.message 
     });
   }
+};
+
+// Get assigned courses for a class in current semester
+exports.getAssignedCourses = async (req, res) => {
+    try {
+        const { classId, currentSemester } = req.params;
+        console.log("-----------------------");
+        console.log('classId', classId);
+        
+        // First get the class document using classId string
+        const classDetails = await Class.findOne({ classId: classId });
+        if (!classDetails) {
+            return res.status(404).json({ message: 'Class not found' });
+        }
+
+        console.log("classDetails", classDetails);
+
+        
+
+        // Find all course assignments for this class and semester using semester _id
+        const assignments = await CourseAssignment.find({
+            class: classDetails._id,
+            semester: currentSemester
+        })
+        .populate('course', 'code title credits')
+        .populate('faculty', 'name email photoUrl')
+        .select('course faculty section');
+
+        res.status(200).json(assignments);
+    } catch (error) {
+        console.error('Error in getAssignedCourses:', error);
+        res.status(500).json({ message: error.message });
+    }
 };
