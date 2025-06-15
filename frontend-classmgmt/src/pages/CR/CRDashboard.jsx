@@ -25,7 +25,8 @@ import {
     Collections as CollectionsIcon,
     Book as BookIcon,
     Announcement as AnnouncementIcon,
-    AccessTime as AccessTimeIcon
+    AccessTime as AccessTimeIcon,
+    Schedule as ScheduleIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import AssetCard from './compos/AssetCard';
@@ -33,6 +34,7 @@ import AssignedCourses from '../../components/AssignedCourses';
 import SemesterAssetForm from '../../components/SemesterAssetForm';
 import NoticeForm from '../../components/NoticeForm';
 import CRDeadlineForm from '../../components/CRDeadlineForm';
+import TimetableForm from '../../components/TimetableForm';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -114,7 +116,6 @@ const CRDashboard = () => {
 
     const handleDeadlineSuccess = (deadline) => {
         handleCloseDialog();
-        showToast('Deadline created successfully');
     };
 
     const handleDeadlineError = (error) => {
@@ -144,6 +145,22 @@ const CRDashboard = () => {
                 'Create Deadline'
             ),
             description: 'Create deadlines for assignments and exams'
+        },
+        {
+            title: 'Update Timetable',
+            icon: <ScheduleIcon sx={{ fontSize: 40 }} />,
+            color: theme.palette.error.main,
+            onClick: () => handleOpenDialog(
+                <TimetableForm 
+                    onSubmitSuccess={() => {
+                        handleCloseDialog();
+                        showToast('Timetable updated successfully');
+                    }}
+                    onError={error => showToast(error.message, 'error')}
+                />,
+                'Update Class Timetable'
+            ),
+            description: 'Update semester timetable'
         },
         {
             title: 'Assigned Courses',
