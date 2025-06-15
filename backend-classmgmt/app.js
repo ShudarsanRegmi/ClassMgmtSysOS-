@@ -16,6 +16,7 @@ const courseMaterialRoutes = require('./routes/courseMaterialRoutes');
 const connectDB = require('./config/db');
 const eventRoutes = require('./routes/event.routes');
 const path = require('path');
+const timetableRoutes = require('./routes/timetable');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swaggerOptions");
@@ -57,6 +58,7 @@ app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);
 app.use('/api/admin/settings', settingsRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/timetable', timetableRoutes);
 
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {
