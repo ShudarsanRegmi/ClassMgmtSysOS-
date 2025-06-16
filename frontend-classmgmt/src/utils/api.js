@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 
 const BASE_URL = import.meta.env.BASE_URL
 const api = axios.create({
-    baseURL: `${BASE_URL}:3001/api`
+    baseURL: `${BASE_URL}/api`
 });
 
 // Add auth token to all requests
