@@ -3,14 +3,16 @@ import api from '../../utils/api';
 import StudentList from './StudentList';
 import CRList from './CRList';
 import FacultyList from './FacultyList';
+import HonorList from '../../components/HonorList';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const ClassHomepage = () => {
-  const { classId } = useAuth();
+  const { classId, currentSemester } = useAuth();
   const navigate = useNavigate();
   const [photoUrl, setPhotoUrl] = useState('');
   const [error, setError] = useState('');
+  const [honors, setHonors] = useState([]);
 
   useEffect(() => {
     if (!classId) {
@@ -31,6 +33,21 @@ const ClassHomepage = () => {
 
     fetchClassDetails();
   }, [classId]);
+
+  useEffect(() => {
+    if (classId && currentSemester?.id) {
+      fetchHonorList();
+    }
+  }, [classId, currentSemester]);
+
+  const fetchHonorList = async () => {
+    try {
+      const response = await api.get(`/honors/class/${classId}/semester/${currentSemester.id}`);
+      setHonors(response.data.honors);
+    } catch (error) {
+      console.error('Error fetching honor list:', error);
+    }
+  };
 
   if (!classId) {
     return (
@@ -61,6 +78,7 @@ const ClassHomepage = () => {
         <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover rounded-lg shadow-lg mb-6" />
       )}
 
+      <HonorList honors={honors} />
       <FacultyList classId={classId} />
       <CRList classId={classId} />
       <StudentList classId={classId} />
