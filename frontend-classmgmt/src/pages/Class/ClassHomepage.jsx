@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const ClassHomepage = () => {
-  const { classId, currentSemester } = useAuth();
+  const { classId, currentSemester, userProfile } = useAuth();
   const navigate = useNavigate();
   const [photoUrl, setPhotoUrl] = useState('');
   const [error, setError] = useState('');
@@ -50,6 +50,53 @@ const ClassHomepage = () => {
     }
   };
 
+  const handleUpdateHonor = async (updatedHonor) => {
+    console.log("updatedHonor", updatedHonor);
+    console.log("current honors", honors);
+    try {
+      // Find the original honor object from the honors array
+      const originalHonor = honors.find(h => 
+        h.student._id === updatedHonor.student._id
+      );
+
+      console.log("found original honor", originalHonor);
+
+      if (!originalHonor) {
+        throw new Error('Honor entry not found');
+      }
+
+      await api.put(`/honors/${originalHonor._id}`, {
+        student: originalHonor.student._id,
+        rank: updatedHonor.rank,
+        semester: currentSemester.id,
+        classId: classId
+      });
+      fetchHonorList(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating honor:', error);
+      setError('Failed to update honor list. Please try again.');
+    }
+  };
+
+  const handleDeleteHonor = async (honor) => {
+    try {
+      // Find the original honor object from the honors array
+      const originalHonor = honors.find(h => 
+        h.student._id === honor.student._id
+      );
+
+      if (!originalHonor) {
+        throw new Error('Honor entry not found');
+      }
+
+      await api.delete(`/honors/${originalHonor._id}`);
+      fetchHonorList(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting honor:', error);
+      setError('Failed to delete honor entry. Please try again.');
+    }
+  };
+
   if (!classId) {
     return (
       <div className="p-4 text-center">
@@ -79,7 +126,12 @@ const ClassHomepage = () => {
         <img src={photoUrl} alt="Class Cover" className="w-full h-64 object-cover rounded-lg shadow-lg mb-6" />
       )}
 
-      <HonorList honors={honors} />
+      <HonorList 
+        honors={honors} 
+        isCR={userProfile?.role === 'STUDENT'} 
+        onUpdate={handleUpdateHonor}
+        onDelete={handleDeleteHonor}
+      />
       <FacultyList classId={classId} />
       <CRList classId={classId} />
       <StudentList classId={classId} />
