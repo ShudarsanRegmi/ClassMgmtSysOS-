@@ -18,7 +18,16 @@ exports.getHonorList = async (req, res) => {
       .populate('student', 'name rollNo photoUrl')
       .sort({ rank: 1, 'student.name': 1 });
 
-    res.json({ honors });
+    // Transform the data to only send the photo URL
+    const transformedHonors = honors.map(honor => {
+      const honorObj = honor.toObject();
+      return {
+        ...honorObj,
+        photoUrl: honorObj.photoUrl?.url || null
+      };
+    });
+
+    res.json({ honors: transformedHonors });
   } catch (error) {
     console.error('Error fetching honor list:', error);
     res.status(500).json({ message: 'Error fetching honor list' });
@@ -77,7 +86,13 @@ exports.createOrUpdateHonor = async (req, res) => {
       await honor.save();
     }
 
-    res.json({ honor });
+    // Transform the response to include only the photo URL
+    const transformedHonor = {
+      ...honor.toObject(),
+      photoUrl: honor.photoUrl?.url || null
+    };
+
+    res.json({ honor: transformedHonor });
   } catch (error) {
     console.error('Error creating/updating honor:', error);
     res.status(500).json({ message: 'Error creating/updating honor entry' });
