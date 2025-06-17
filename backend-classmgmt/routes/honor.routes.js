@@ -10,6 +10,9 @@ router.get('/class/:classId/semester/:semesterId', verifyToken, honorController.
 // Create or update honor entry
 router.post('/', verifyToken, upload.single('photo'), honorController.createOrUpdateHonor);
 
+// Update honor entry
+router.put('/:honorId', verifyToken, honorController.updateHonor);
+
 // Delete honor entry
 router.delete('/:honorId', verifyToken, honorController.deleteHonor);
 

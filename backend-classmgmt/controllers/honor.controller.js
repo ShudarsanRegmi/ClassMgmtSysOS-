@@ -3,6 +3,10 @@ const uploadToCloudinary = require('../utils/cloudinaryUploader');
 const Class = require('../models/Class');
 const fs = require('fs');
 
+const cloudinary = require('cloudinary').v2;
+
+
+
 // Get honor list for a class and semester
 exports.getHonorList = async (req, res) => {
   try {
@@ -96,6 +100,41 @@ exports.createOrUpdateHonor = async (req, res) => {
   } catch (error) {
     console.error('Error creating/updating honor:', error);
     res.status(500).json({ message: 'Error creating/updating honor entry' });
+  }
+};
+
+// Update honor entry
+exports.updateHonor = async (req, res) => {
+  try {
+    const { honorId } = req.params;
+    const { student, rank, semester, classId } = req.body;
+
+    // Find the class document to get its _id
+    const classDoc = await Class.findOne({ classId });
+    if (!classDoc) {
+      return res.status(404).json({ message: 'Class not found' });
+    }
+
+    // Find the honor entry
+    const honor = await Honor.findById(honorId);
+    if (!honor) {
+      return res.status(404).json({ message: 'Honor entry not found' });
+    }
+
+    // Update the honor entry
+    honor.rank = rank;
+    await honor.save();
+
+    // Transform the response to include only the photo URL
+    const transformedHonor = {
+      ...honor.toObject(),
+      photoUrl: honor.photoUrl?.url || null
+    };
+
+    res.json({ honor: transformedHonor });
+  } catch (error) {
+    console.error('Error updating honor:', error);
+    res.status(500).json({ message: 'Error updating honor entry' });
   }
 };
 
