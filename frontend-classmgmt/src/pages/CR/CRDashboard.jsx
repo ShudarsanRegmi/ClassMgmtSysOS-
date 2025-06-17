@@ -26,7 +26,8 @@ import {
     Book as BookIcon,
     Announcement as AnnouncementIcon,
     AccessTime as AccessTimeIcon,
-    Schedule as ScheduleIcon
+    Schedule as ScheduleIcon,
+    EmojiEvents as TrophyIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import AssetCard from './compos/AssetCard';
@@ -35,6 +36,7 @@ import SemesterAssetForm from '../../components/SemesterAssetForm';
 import NoticeForm from '../../components/NoticeForm';
 import CRDeadlineForm from '../../components/CRDeadlineForm';
 import TimetableForm from '../../components/TimetableForm';
+import HonorForm from '../../components/HonorForm';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -196,6 +198,22 @@ const CRDashboard = () => {
                 'Semester Assets'
             ),
             description: 'Browse uploaded semester assets'
+        },
+        {
+            title: 'Manage Rank Holders',
+            icon: <TrophyIcon sx={{ fontSize: 40 }} />,
+            color: theme.palette.warning.main,
+            onClick: () => handleOpenDialog(
+                <HonorForm 
+                    onSubmitSuccess={() => {
+                        handleCloseDialog();
+                        showToast('Rank holder added successfully');
+                    }}
+                    onError={error => showToast(error, 'error')}
+                />,
+                'Manage Rank Holders'
+            ),
+            description: 'Add and manage semester rank holders'
         }
     ];
 
