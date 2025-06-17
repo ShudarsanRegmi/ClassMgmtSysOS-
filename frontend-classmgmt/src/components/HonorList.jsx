@@ -11,8 +11,10 @@ import {
 } from '@mui/material';
 import { EmojiEvents as Trophy } from '@mui/icons-material';
 
-const RankCard = ({ student, rank }) => {
+const RankCard = ({ student, rank, photoUrl }) => {
   const theme = useTheme();
+
+  console.log("student", student);
   
   const getRankColor = (rank) => {
     switch (rank) {
@@ -64,7 +66,7 @@ const RankCard = ({ student, rank }) => {
       
       <CardContent sx={{ pt: 4, textAlign: 'center' }}>
         <Avatar
-          src={student.photoUrl?.url}
+          src={photoUrl}
           alt={student.name}
           sx={{
             width: 100,
@@ -127,7 +129,11 @@ const HonorList = ({ honors }) => {
             <Box sx={{ mb: 2 }}>
               {honorsByRank[rank]?.map((honor) => (
                 <Box key={honor._id} sx={{ mb: 2 }}>
-                  <RankCard student={honor.student} rank={rank} />
+                  <RankCard 
+                    student={honor.student} 
+                    rank={rank} 
+                    photoUrl={honor.photoUrl}
+                  />
                 </Box>
               ))}
             </Box>

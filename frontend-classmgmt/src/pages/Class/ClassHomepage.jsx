@@ -43,6 +43,7 @@ const ClassHomepage = () => {
   const fetchHonorList = async () => {
     try {
       const response = await api.get(`/honors/class/${classId}/semester/${currentSemester.id}`);
+      console.log(response.data.honors);
       setHonors(response.data.honors);
     } catch (error) {
       console.error('Error fetching honor list:', error);
