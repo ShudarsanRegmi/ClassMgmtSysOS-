@@ -252,11 +252,15 @@ const StandaloneCourseView = () => {
             width: drawerWidth,
             boxSizing: 'border-box',
             mt: '64px', // Height of AppBar
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 64px)', // Set explicit height
+            overflow: 'hidden', // Prevent drawer from scrolling
           },
         }}
       >
         {/* Course Info Section */}
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3, flexShrink: 0 }}>
           <Box sx={{ mb: 3, textAlign: 'center' }}>
             <Avatar
               src={courseData?.faculty?.photoUrl}
@@ -284,23 +288,43 @@ const StandaloneCourseView = () => {
           </Box>
         </Box>
 
-        <Divider />
+        <Divider sx={{ flexShrink: 0 }} />
 
-        {/* Navigation List */}
-        <List>
-          {navigationItems.map((item) => (
-            <ListItem
-              component="div"
-              key={item.id}
-              selected={activeSection === item.id}
-              onClick={() => setActiveSection(item.id)}
-              sx={{ '&:hover': { cursor: 'pointer' } }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItem>
-          ))}
-        </List>
+        {/* Navigation List - Scrollable */}
+        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <List 
+            sx={{ 
+              height: '100%',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#a8a8a8',
+              },
+            }}
+          >
+            {navigationItems.map((item) => (
+              <ListItem
+                component="div"
+                key={item.id}
+                selected={activeSection === item.id}
+                onClick={() => setActiveSection(item.id)}
+                sx={{ '&:hover': { cursor: 'pointer' } }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       </Drawer>
 
       {/* Main Content */}
