@@ -332,6 +332,7 @@ export const AuthProvider = ({ children }) => {
         isAdmin: hasRole('ADMIN'),
         isFaculty: hasRole('FACULTY'),
         isStudent: hasRole('STUDENT'),
+        isCR : true,
         hasRole,
         
         // Enhanced semester information and management
