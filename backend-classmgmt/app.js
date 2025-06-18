@@ -17,6 +17,7 @@ const connectDB = require('./config/db');
 const eventRoutes = require('./routes/event.routes');
 const path = require('path');
 const timetableRoutes = require('./routes/timetable');
+const honorRoutes = require('./routes/honor.routes');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swaggerOptions");
@@ -59,7 +60,7 @@ app.use('/api/assignments/', assignmentRoutes);
 app.use('/api/admin/settings', settingsRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/timetable', timetableRoutes);
-
+app.use('/api/honors', honorRoutes);
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {
     res.send("Welcome to the API!");
