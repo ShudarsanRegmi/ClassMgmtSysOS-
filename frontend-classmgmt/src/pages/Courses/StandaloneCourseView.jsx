@@ -34,7 +34,8 @@ import {
   ArrowBack,
   Person,
   CalendarToday,
-  School
+  School,
+  History
 } from '@mui/icons-material';
 
 // Import the individual content components
@@ -44,6 +45,25 @@ import MaterialsTab from './CourseContent/MaterialsTab';
 import SharedNotesTab from './CourseContent/SharedNotesTab';
 import WhiteboardTab from './CourseContent/WhiteboardTab';
 
+// Dummy PYQs Tab Component
+const PYQsTab = () => (
+  <Box>
+    <Typography variant="h4" gutterBottom>
+      Previous Year Questions (PYQs)
+    </Typography>
+    <Paper sx={{ p: 3, textAlign: 'center' }}>
+      <Typography variant="h6" color="textSecondary" gutterBottom>
+        🎯 PYQs Section
+      </Typography>
+      <Typography variant="body1" color="textSecondary">
+        This section will contain previous year question papers and solutions.
+      </Typography>
+      <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+        Content coming soon...
+      </Typography>
+    </Paper>
+  </Box>
+);
 
 // Component to display the course specific content
 const StandaloneCourseView = () => {
@@ -91,6 +111,7 @@ const StandaloneCourseView = () => {
     { id: 'materials', label: 'Course Materials', icon: <Description /> },
     { id: 'notes', label: 'Shared Notes', icon: <Note /> },
     { id: 'whiteboard', label: 'Whiteboard Shots', icon: <PhotoLibrary /> },
+    { id: 'pyqs', label: 'PYQs', icon: <History /> },
   ];
 
   const handleDrawerToggle = () => {
@@ -175,6 +196,8 @@ const StandaloneCourseView = () => {
             }));
           }}
         />;
+      case 'pyqs':
+        return <PYQsTab />;
       default:
         return null;
     }
