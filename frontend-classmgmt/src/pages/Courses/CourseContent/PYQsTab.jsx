@@ -190,27 +190,11 @@ const PYQsTab = ({ courseId, semesterId }) => {
             <Paper key={pyq._id} sx={{ mb: 2, p: 2 }}>
               <ListItem alignItems="flex-start">
                 <ListItemText
-                  primary={<>
-                    <b>Batch:</b> {pyq.batch} | <b>Year:</b> {pyq.year} {pyq.faculty && <>| <b>Faculty:</b> {pyq.faculty}</>}
-                  </>}
-                  secondary={<>
-                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
-                      {pyq.files.map((file, idx) => (
-                        <a key={idx} href={file.url} target="_blank" rel="noopener noreferrer">
-                          <Tooltip title={file.type === 'pdf' ? 'PDF' : 'Image'}>
-                            <Avatar sx={{ bgcolor: file.type === 'pdf' ? 'error.main' : 'primary.main', width: 48, height: 48 }}>
-                              {file.type === 'pdf' ? <PictureAsPdf /> : <Image />}
-                            </Avatar>
-                          </Tooltip>
-                        </a>
-                      ))}
-                    </Box>
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="caption" color="textSecondary">
-                        Uploaded by: {pyq.uploader?.name || 'Unknown'} | {new Date(pyq.createdAt).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </>}
+                  primary={
+                    <>
+                      <b>Batch:</b> {pyq.batch} | <b>Year:</b> {pyq.year} {pyq.faculty && <>| <b>Faculty:</b> {pyq.faculty}</>}
+                    </>
+                  }
                 />
                 {(userProfile?._id === pyq.uploader?._id || userProfile?.role === 'CR') && (
                   <ListItemSecondaryAction>
@@ -220,6 +204,22 @@ const PYQsTab = ({ courseId, semesterId }) => {
                   </ListItemSecondaryAction>
                 )}
               </ListItem>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
+                {pyq.files.map((file, idx) => (
+                  <a key={idx} href={file.url} target="_blank" rel="noopener noreferrer">
+                    <Tooltip title={file.type === 'pdf' ? 'PDF' : 'Image'}>
+                      <Avatar sx={{ bgcolor: file.type === 'pdf' ? 'error.main' : 'primary.main', width: 48, height: 48 }}>
+                        {file.type === 'pdf' ? <PictureAsPdf /> : <Image />}
+                      </Avatar>
+                    </Tooltip>
+                  </a>
+                ))}
+              </Box>
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" color="textSecondary">
+                  Uploaded by: {pyq.uploader?.name || 'Unknown'} | {new Date(pyq.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
             </Paper>
           ))}
         </List>
