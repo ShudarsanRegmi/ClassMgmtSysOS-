@@ -4,8 +4,8 @@ import { getAuth } from 'firebase/auth';
 
 
 // const BASE_URL = import.meta.env.BASE_URL || 'https://classmgmtsys.onrender.com';
-// const BASE_URL = 'https://classmgmtsys.onrender.com';
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'https://classmgmtsys.onrender.com';
+// const BASE_URL = 'http://localhost:3001';
 console.log("BASE_URL:", BASE_URL);
 const api = axios.create({
     baseURL: `${BASE_URL}/api`
