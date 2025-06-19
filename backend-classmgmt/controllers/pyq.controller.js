@@ -1,12 +1,15 @@
 const Pyq = require('../models/Pyq');
-const { uploadToCloudinary } = require('../utils/cloudinaryUploader');
+const  uploadToCloudinary  = require('../utils/cloudinaryUploader');
 const fs = require('fs');
+const User = require('../models/User');
 
 // Upload PYQ (multiple files)
 exports.uploadPyq = async (req, res) => {
   try {
     const { course, semester, batch, year, faculty } = req.body;
-    const uploader = req.user._id || req.user.id || req.user.uid;
+    const user = await User.findOne({ uid: req.user.uid });
+    if (!user) return res.status(400).json({ message: 'Uploader not found' });
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No files uploaded' });
     }
@@ -30,7 +33,7 @@ exports.uploadPyq = async (req, res) => {
       year,
       faculty,
       files,
-      uploader
+      uploader: user._id
     });
     await pyq.save();
     res.status(201).json({ pyq });
@@ -42,6 +45,7 @@ exports.uploadPyq = async (req, res) => {
 
 // List all PYQs for a course/semester
 exports.listPyqs = async (req, res) => {
+  console.log("Received a response to fetch the pyqs")
   try {
     const { courseId, semesterId } = req.params;
     const pyqs = await Pyq.find({ course: courseId, semester: semesterId })
