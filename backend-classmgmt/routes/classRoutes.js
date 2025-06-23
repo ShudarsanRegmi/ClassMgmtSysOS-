@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const classController = require('../controllers/classController');
 const upload = require('../middleware/uploadMiddleware');
-const { getClassHomepage } = require('../controllers/classController');
-const { verifyToken } = require('../middleware/authmiddleware');
+const  verifyToken = require('../middleware/authmiddleware');
 const { getFacultyMembers } = require('../controllers/facultyController');
 
 
@@ -20,7 +19,8 @@ router.delete('/delete/:classId', classController.deleteClassById); // Delete cl
 // Used in : ProfileForm.jsx, CourseAssignment.jsx, Addsemester.jsx to show the list of available classes
 router.get('/getAllClasses', classController.getAllClasses);
 
-
+// Update class cover image
+router.put('/:classId/cover-image', verifyToken, upload.single('photo'), classController.updateClassCoverImage);
 
 // Fetch class homepage data 
 // Todo: This must have been removed 
@@ -29,7 +29,7 @@ router.get('/homepage/:uid', classController.fetchClassHomepage);
 
 // Fetch paginated students of a class
 // We've created this as a separate route under classRoutes. However, the pagination logic could also be implemented on the route: /api/class/:classId/students?page=1&limit=1
-router.get('students/:classId', classController.fetchPaginatedStudents);
+router.get('/students/:classId', classController.fetchPaginatedStudents);
 
 // Used in : ClassHomepage.jsx
 router.get('/:classId/details', classController.getClassDetails);

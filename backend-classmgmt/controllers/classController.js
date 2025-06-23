@@ -253,6 +253,47 @@ const updateCurrentSemester = async (req, res) => {
   }
 };
 
+const updateClassCoverImage = async (req, res) => {
+  try {
+    const { classId } = req.params;
+
+    // Validate file upload
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file uploaded' });
+    }
+
+    // Find the class
+    const classData = await Class.findOne({ classId: classId.toUpperCase() });
+    if (!classData) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    // Upload new image to Cloudinary
+    let newPhotoUrl = '';
+    try {
+      const result = await uploadToCloudinary(req.file.path, 'class_photos');
+      newPhotoUrl = result.secure_url;
+      // Clean up the temporary file
+      fs.unlinkSync(req.file.path);
+    } catch (uploadError) {
+      console.error("Error uploading to Cloudinary:", uploadError);
+      return res.status(500).json({ error: 'Failed to upload image' });
+    }
+
+    // Update the class's photo URL
+    classData.photoUrl = newPhotoUrl;
+    await classData.save();
+
+    res.status(200).json({
+      message: 'Class cover image updated successfully',
+      photoUrl: newPhotoUrl
+    });
+  } catch (error) {
+    console.error("Error updating class cover image:", error);
+    res.status(500).json({ error: 'Failed to update class cover image' });
+  }
+};
+
 module.exports = {
   createClass, 
   getAllClasses, 
@@ -260,5 +301,6 @@ module.exports = {
   fetchClassHomepage, 
   fetchPaginatedStudents, 
   getClassDetails,
-  updateCurrentSemester
+  updateCurrentSemester,
+  updateClassCoverImage
 };
