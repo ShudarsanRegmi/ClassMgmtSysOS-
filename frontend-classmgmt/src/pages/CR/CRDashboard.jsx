@@ -27,7 +27,8 @@ import {
     Announcement as AnnouncementIcon,
     AccessTime as AccessTimeIcon,
     Schedule as ScheduleIcon,
-    EmojiEvents as TrophyIcon
+    EmojiEvents as TrophyIcon,
+    PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import AssetCard from './compos/AssetCard';
@@ -37,6 +38,7 @@ import NoticeForm from '../../components/NoticeForm';
 import CRDeadlineForm from '../../components/CRDeadlineForm';
 import TimetableForm from '../../components/TimetableForm';
 import HonorForm from '../../components/HonorForm';
+import ClassCoverImageForm from '../../components/ClassCoverImageForm';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -214,6 +216,22 @@ const CRDashboard = () => {
                 'Manage Rank Holders'
             ),
             description: 'Add and manage semester rank holders'
+        },
+        {
+            title: 'Update Cover Image',
+            icon: <PhotoCameraIcon sx={{ fontSize: 40 }} />,
+            color: theme.palette.info.main,
+            onClick: () => handleOpenDialog(
+                <ClassCoverImageForm 
+                    onSubmitSuccess={(message) => {
+                        handleCloseDialog();
+                        showToast(message);
+                    }}
+                    onError={error => showToast(error, 'error')}
+                />,
+                'Update Class Cover Image'
+            ),
+            description: 'Update class homepage cover image'
         }
     ];
 
