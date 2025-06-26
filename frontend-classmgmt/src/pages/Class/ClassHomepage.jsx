@@ -113,8 +113,8 @@ const ClassHomepage = () => {
 )}
 
 {/* Welcome Section */}
-<div className="max-w-5xl mx-auto px-4 -mt-16 md:-mt-24 z-20 relative">
-  <div className="bg-white/5 border border-white/10 backdrop-blur-md shadow-xl rounded-xl p-6 md:p-10 text-white text-center">
+<div className="max-w-5xl mx-auto px-4 -mt-16 md:-mt-24 z-20 relative mb-8">
+  <div className="bg-white/5 border border-white/10 backdrop-blur-md shadow-xl rounded-xl p-6 md:p-10 text-white text-center mb-8">
     <h1 className="text-3xl md:text-5xl font-bold mb-2">Welcome to the Class</h1>
     <p className="text-lg md:text-xl text-gray-300 mb-4">
       You're currently viewing the class portal for <br /> <span className="font-semibold text-blue-400">CYS230</span>.
