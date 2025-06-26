@@ -102,7 +102,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg sticky top-0 z-50">
+    <header className="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo and Brand */}
