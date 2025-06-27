@@ -7,14 +7,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
+  Stack,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import DeadlineForm from '../../../components/DeadlineForm';
+import DeadlineCard from './DeadlineCard';
+import DeadlineStats from './DeadlineStats';
 
 const DeadlinesTab = ({ deadlines = [], courseId, semesterId, onDeadlineUpdate }) => {
   const [open, setOpen] = useState(false);
@@ -29,71 +28,43 @@ const DeadlinesTab = ({ deadlines = [], courseId, semesterId, onDeadlineUpdate }
     handleClose();
   };
 
-  const getStatusColor = (deadline) => {
-    const now = dayjs();
-    const dueDate = dayjs(deadline.dueDate);
-    
-    if (now.isAfter(dueDate)) return 'error';
-    if (now.add(1, 'day').isAfter(dueDate)) return 'warning';
-    return 'success';
-  };
+  // Categorize deadlines
+  const now = dayjs();
+  const upcoming = deadlines.filter(d => dayjs(d.dueDate).isAfter(now));
+  const overdue = deadlines.filter(d => dayjs(d.dueDate).isBefore(now));
+
+  const sortedDeadlines = [...upcoming, ...overdue];
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6">Deadlines</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleClickOpen}
-        >
-          Add Deadline
+    <Box className="space-y-6">
+      {/* Header and Add Button */}
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h5" fontWeight={600}>📌 Deadlines</Typography>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleClickOpen}>
+          Add
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
-        {Array.isArray(deadlines) && deadlines.map((deadline) => (
-          <Grid item xs={12} md={6} key={deadline._id}>
-            <Card>
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                  <Typography variant="h6" gutterBottom>
-                    {deadline.title}
-                  </Typography>
-                  <Box>
-                    <Chip
-                      label={deadline.type}
-                      color="primary"
-                      size="small"
-                      sx={{ mr: 1 }}
-                    />
-                    <Chip
-                      label={dayjs(deadline.dueDate).format('MMM D, YYYY h:mm A')}
-                      color={getStatusColor(deadline)}
-                      size="small"
-                    />
-                  </Box>
-                </Box>
-                <Typography color="textSecondary" gutterBottom>
-                  {deadline.description}
-                </Typography>
-                {deadline.fileUrl && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    href={deadline.fileUrl}
-                    target="_blank"
-                    sx={{ mt: 1 }}
-                  >
-                    View Attachment
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Stats */}
+      <DeadlineStats
+        total={deadlines.length}
+        upcoming={upcoming.length}
+        overdue={overdue.length}
+      />
 
+      {/* List */}
+      <Stack spacing={2}>
+        {sortedDeadlines.map(dl => (
+          <DeadlineCard key={dl._id} deadline={dl} />
+        ))}
+        {deadlines.length === 0 && (
+          <Typography color="text.secondary" className="text-center py-4">
+            No deadlines found.
+          </Typography>
+        )}
+      </Stack>
+
+      {/* Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Deadline</DialogTitle>
         <DialogContent>
@@ -111,4 +82,4 @@ const DeadlinesTab = ({ deadlines = [], courseId, semesterId, onDeadlineUpdate }
   );
 };
 
-export default DeadlinesTab; 
+export default DeadlinesTab;
