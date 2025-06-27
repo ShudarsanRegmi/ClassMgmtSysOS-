@@ -59,7 +59,7 @@ const RealHome = () => (
     {/* Centered overlay content */}
     <div className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
       <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-white drop-shadow-lg mb-6">
-        Class Management <span className="block text-cyan-400">Reimagined.</span>
+        Class Management <span className="block text-blue-200">Reimagined.</span>
       </h1>
       <p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 drop-shadow">
         A futuristic way to manage your academic journey. Seamlessly handle classes, semesters, courses, files, and more—all in one intuitive platform.
@@ -67,13 +67,13 @@ const RealHome = () => (
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           to="/login"
-          className="px-8 py-3 bg-cyan-500 text-white rounded-lg font-semibold text-lg hover:bg-cyan-600 transition shadow"
+          className="px-8 py-3 bg-blue-400 text-white rounded-lg font-semibold text-lg hover:bg-cyan-600 transition shadow"
         >
           Login
         </Link>
         <Link
           to="/register"
-          className="px-8 py-3 border border-cyan-400 text-cyan-400 rounded-lg font-semibold text-lg hover:bg-cyan-600 hover:text-white transition shadow"
+          className="px-8 py-3 border border-cyan-400 text-blue-200 rounded-lg font-semibold text-lg hover:bg-cyan-600 hover:text-white transition shadow"
         >
           Register
         </Link>
