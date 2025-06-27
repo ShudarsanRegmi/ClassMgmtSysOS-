@@ -18,7 +18,7 @@ import ClassHomepage from "./pages/Class/ClassHomepage";
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateCourse from "./pages/Courses/CreateCourse";
 import SemesterCourses from "./pages/Courses/SemesterCourses";
-import SystemSettingsForm from "./pages/Admin/SystemSettingsForm";
+import UserSettings from "./components/SystemSettingsForm";
 import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import NoticeBoard from './components/NoticeBoard';
 import NoticeForm from './components/NoticeForm';
@@ -144,10 +144,10 @@ function App() {
                   </PrivateRoute>
                 } />
 
-                {/* Admin Routes */}
-                <Route path="/admin/settings" element={
+                {/* User Settings Route */}
+                <Route path="/settings" element={
                   <PrivateRoute>
-                    <SystemSettingsForm />
+                    <UserSettings />
                   </PrivateRoute>
                 } />
 
