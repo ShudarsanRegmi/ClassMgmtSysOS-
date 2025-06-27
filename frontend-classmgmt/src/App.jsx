@@ -18,7 +18,7 @@ import ClassHomepage from "./pages/Class/ClassHomepage";
 import AddSemester from "./pages/Sem/AddSemester";
 import CreateCourse from "./pages/Courses/CreateCourse";
 import SemesterCourses from "./pages/Courses/SemesterCourses";
-import UserSettings from "./components/SystemSettingsForm";
+import UserSettings from "./components/Settings";
 import CourseAssignmentForm from "./pages/Courses/CourseAssignmentForm";
 import NoticeBoard from './components/NoticeBoard';
 import NoticeForm from './components/NoticeForm';
