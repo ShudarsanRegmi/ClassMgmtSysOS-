@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../App';
 import { 
   FaHome, 
   FaUserCircle, 
@@ -23,6 +24,7 @@ const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const profileDropdownRef = useRef(null);
+  const theme = useTheme();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,6 +99,10 @@ const Navbar = () => {
           <FaBell className="h-4 w-4" />
           <span>Notices</span>
         </Link>
+        <Link to="/settings" className={baseClass('/settings')} onClick={() => setIsOpen(false)}>
+          <FaCog className="h-4 w-4" />
+          <span>Settings</span>
+        </Link>
       </>
     );
   };
@@ -156,7 +162,7 @@ const Navbar = () => {
                       <span>My Profile</span>
                     </Link>
                     <Link
-                      to="/admin/settings"
+                      to="/settings"
                       className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
                       onClick={() => setIsProfileOpen(false)}
                     >
@@ -226,7 +232,7 @@ const Navbar = () => {
                     <span>My Profile</span>
                   </Link>
                   <Link 
-                    to="/admin/settings" 
+                    to="/settings" 
                     className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50"
                     onClick={() => setIsOpen(false)}
                   >
