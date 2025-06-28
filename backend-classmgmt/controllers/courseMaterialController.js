@@ -1,6 +1,5 @@
 const {
     Deadline,
-    Syllabus,
     CourseMaterial,
     SharedNote,
     WhiteboardShot
@@ -68,10 +67,6 @@ const getCourseMaterials = async (req, res) => {
                     .populate('uploadedBy', 'name email photoUrl')
                     .sort({ dueDate: 1 });
                 break;
-            case 'syllabus':
-                materials = await Syllabus.findOne(query)
-                    .populate('uploadedBy', 'name email photoUrl');
-                break;
             case 'materials':
                 materials = await CourseMaterial.find(query)
                     .populate('uploadedBy', 'name email photoUrl')
@@ -90,9 +85,8 @@ const getCourseMaterials = async (req, res) => {
                 break;
             default:
                 // Get all types of materials
-                const [deadlines, syllabus, courseMaterials, notes, whiteboardShots] = await Promise.all([
+                const [deadlines, courseMaterials, notes, whiteboardShots] = await Promise.all([
                     Deadline.find(query).populate('uploadedBy', 'name email photoUrl'),
-                    Syllabus.findOne(query).populate('uploadedBy', 'name email photoUrl'),
                     CourseMaterial.find(query).populate('uploadedBy', 'name email photoUrl'),
                     SharedNote.find(query).populate('uploadedBy', 'name email photoUrl').populate('likes', 'name'),
                     WhiteboardShot.find(query).populate('uploadedBy', 'name email photoUrl')
@@ -100,7 +94,6 @@ const getCourseMaterials = async (req, res) => {
 
                 materials = {
                     deadlines,
-                    syllabus,
                     courseMaterials,
                     notes,
                     whiteboardShots
@@ -183,9 +176,6 @@ const uploadMaterial = async (req, res) => {
                 case 'deadline':
                     material = new Deadline(materialData);
                     break;
-                case 'syllabus':
-                    material = new Syllabus(materialData);
-                    break;
                 case 'material':
                     material = new CourseMaterial(materialData);
                     break;
@@ -236,9 +226,6 @@ const updateMaterial = async (req, res) => {
         switch (type) {
             case 'deadline':
                 Model = Deadline;
-                break;
-            case 'syllabus':
-                Model = Syllabus;
                 break;
             case 'material':
                 Model = CourseMaterial;
@@ -291,9 +278,6 @@ const deleteMaterial = async (req, res) => {
         switch (type) {
             case 'deadline':
                 Model = Deadline;
-                break;
-            case 'syllabus':
-                Model = Syllabus;
                 break;
             case 'material':
                 Model = CourseMaterial;

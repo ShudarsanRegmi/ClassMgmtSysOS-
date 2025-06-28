@@ -18,7 +18,7 @@ router.post('/create', courseController.createCourse);
 // Used in : CreateCourse.jsx to delete course
 router.delete('/:id', verifyToken, courseController.deleteCourse);
 
-// Used in : CourseAssignmentForm.jsx to show the list of available courses
+// Used in : CreateCourse.jsx to show the list of available courses
 router.get('/getAllCourses', courseController.getAllCourses);
 
 // Get courses for a specific semester
@@ -37,7 +37,6 @@ router.get('/:courseId/students', verifyToken, getClassStudents); // Looks dupli
 
 router.get('/:courseId/materials/:semesterId', verifyToken, getCourseMaterials); // used to fetch all materials for a course for a semester
 router.get('/:courseId/materials/:semesterId/:type', verifyToken, getCourseMaterials);
-
 
 // Handle file uploads based on material type
 router.post('/:courseId/materials/:semesterId/:type', verifyToken, (req, res, next) => {

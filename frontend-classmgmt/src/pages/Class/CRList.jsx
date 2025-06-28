@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import PropTypes from 'prop-types';
-import { FaUserCircle, FaEnvelope, FaPhone, FaStar, FaComments } from 'react-icons/fa';
+import { FaUserCircle, FaEnvelope, FaPhone, FaStar, FaCommentDots } from 'react-icons/fa';
 
 const ProfileImage = ({ cr }) => {
   const [imageError, setImageError] = useState(false);
 
-  if (!cr.photoUrl || imageError) {
-    return (
-      <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
-        <FaUserCircle className="h-8 w-8 text-blue-300" />
-      </div>
-    );
-  }
-
   return (
-    <img
-      src={cr.photoUrl}
-      alt={cr.name}
-      className="w-16 h-16 rounded-full object-cover border-2 border-blue-100"
-      onError={() => setImageError(true)}
-    />
+    <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-blue-500 shadow-md bg-[#1E293B]">
+      {!imageError && cr.photoUrl ? (
+        <img
+          src={cr.photoUrl}
+          alt={cr.name}
+          className="object-cover w-full h-full"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-[#334155] text-blue-200">
+          <FaUserCircle className="w-10 h-10" />
+        </div>
+      )}
+      <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 p-1 rounded-full shadow-sm">
+        <FaStar className="text-white text-xs" />
+      </div>
+    </div>
   );
 };
 
@@ -30,6 +33,37 @@ ProfileImage.propTypes = {
     name: PropTypes.string.isRequired,
   }).isRequired,
 };
+
+const CRCard = ({ cr }) => (
+  <div className="bg-[#0F172A] text-white rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center gap-6 border border-[#334155] hover:shadow-xl transition-all duration-300">
+    <ProfileImage cr={cr} />
+
+    <div className="flex-grow w-full">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{cr.name}</h3>
+        <span className="text-xs bg-blue-600 px-2 py-0.5 rounded-full">Class Rep</span>
+      </div>
+
+      <div className="mt-3 space-y-2 text-sm text-gray-300">
+        <div className="flex items-center gap-2">
+          <FaEnvelope className="text-blue-400" />
+          <span className="truncate">{cr.email}</span>
+        </div>
+        {cr.phone && (
+          <div className="flex items-center gap-2">
+            <FaPhone className="text-blue-400" />
+            <span>{cr.phone}</span>
+          </div>
+        )}
+      </div>
+
+      <button className="mt-4 w-full bg-blue-700 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded flex items-center justify-center gap-2 transition-all duration-200">
+        <FaCommentDots />
+        Contact {cr.name.split(' ')[0]}
+      </button>
+    </div>
+  </div>
+);
 
 const CRList = ({ classId }) => {
   const [crs, setCrs] = useState([]);
@@ -47,11 +81,7 @@ const CRList = ({ classId }) => {
         setCrs(response.data);
       } catch (error) {
         console.error('Error fetching CRs:', error);
-        if (error.response?.status === 404) {
-          setError('No CRs assigned to this class');
-        } else {
-          setError('Failed to load class representatives');
-        }
+        setError('Failed to load class representatives.');
       } finally {
         setLoading(false);
       }
@@ -60,82 +90,30 @@ const CRList = ({ classId }) => {
     fetchCRs();
   }, [classId]);
 
-  if (loading) {
-    return (
-      <div className="max-w-3xl mx-auto p-4">
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
-    );
-  }
-
-  const renderCRCard = (cr) => (
-    <div key={cr._id} className="bg-gradient-to-br from-blue-50 to-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-      <div className="p-4">
-        <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0">
-            <div className="relative">
-              <ProfileImage cr={cr} />
-              <div className="absolute -top-1 -right-1">
-                <div className="bg-yellow-400 rounded-full p-1" title="Class Representative">
-                  <FaStar className="h-3 w-3 text-white" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex-grow">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">{cr.name}</h3>
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">CR</span>
-            </div>
-            
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center text-sm text-gray-600">
-                <FaEnvelope className="h-3.5 w-3.5 mr-2 text-gray-400" />
-                <span className="truncate">{cr.email}</span>
-              </div>
-              {cr.phone && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <FaPhone className="h-3.5 w-3.5 mr-2 text-gray-400" />
-                  <span>{cr.phone}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="border-t border-blue-50 bg-gradient-to-r from-blue-50 to-transparent">
-        <button className="w-full py-2 px-4 text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center transition-colors duration-200">
-          <FaComments className="h-4 w-4 mr-2" />
-          Contact CR
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white rounded-xl shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">Class Representatives</h2>
-          <p className="text-sm text-gray-500 mt-1">Your point of contact for class-related matters</p>
-        </div>
-        <div className="flex items-center text-sm text-gray-500">
-          <FaStar className="h-4 w-4 mr-1.5 text-yellow-400" />
-          Total CRs: {crs.length}
-        </div>
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white">Class Representatives</h2>
+        <p className="text-gray-400 text-sm">Trusted point of contact for all class affairs</p>
       </div>
-      
-      {error ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm text-yellow-700">{error}</p>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-24">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+        </div>
+      ) : error ? (
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 p-4 rounded-md">
+          {error}
+        </div>
+      ) : crs.length === 0 ? (
+        <div className="bg-[#1E293B] text-gray-400 text-center p-6 border border-[#334155] rounded-lg">
+          No class representatives found for this class.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {crs.map(renderCRCard)}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {crs.map((cr) => (
+            <CRCard key={cr._id} cr={cr} />
+          ))}
         </div>
       )}
     </div>
@@ -143,7 +121,7 @@ const CRList = ({ classId }) => {
 };
 
 CRList.propTypes = {
-  classId: PropTypes.string.isRequired
+  classId: PropTypes.string.isRequired,
 };
 
 export default CRList;

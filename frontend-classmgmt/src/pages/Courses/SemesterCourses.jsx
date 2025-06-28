@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../App';
 import api from '../../utils/api';
 import {
   Box,
@@ -16,14 +17,18 @@ import {
 } from '@mui/material';
 import { School, Person, Timer, Visibility } from '@mui/icons-material';
 
-// Used in Dashboard to list the courses for the particular semester 
-
 const SemesterCourses = () => {
   const [courseAssignments, setCourseAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { currentSemester } = useAuth();
+  const { theme, themeName } = useTheme();
   const navigate = useNavigate();
+
+  const cardBg = themeName === 'dark' ? '#181f2a' : '#fff';
+  const cardText = themeName === 'dark' ? '#f1f5f9' : '#1e293b';
+  const chipBg = themeName === 'dark' ? '#22304a' : '#e3e8f0';
+  const chipText = themeName === 'dark' ? '#60a5fa' : '#2563eb';
 
   useEffect(() => {
     const fetchCourseAssignments = async () => {
@@ -49,7 +54,7 @@ const SemesterCourses = () => {
 
   const handleViewCourse = (courseAssignment) => {
     navigate(`/courses/${courseAssignment.courseId}/semester/${currentSemester.id}`, {
-      state: { 
+      state: {
         assignmentId: courseAssignment.id,
         facultyName: courseAssignment.faculty.name
       }
@@ -73,65 +78,123 @@ const SemesterCourses = () => {
   }
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" gutterBottom>
+    <Box p={3} className={`${theme.bg} min-h-screen`}>
+      <Typography variant="h5" gutterBottom className={theme.text}>
         Courses for {currentSemester?.name}
       </Typography>
-      
-      <Grid container spacing={3}>
+
+      <Grid container spacing={4}>
         {courseAssignments.map((assignment) => (
-          <Grid item xs={12} md={6} lg={4} key={assignment.id}>
-            <Card elevation={2}>
+          <Grid item xs={12} sm={12} md={6} lg={5} xl={4} key={assignment.id}>
+            <Card
+              elevation={5}
+              className={`rounded-2xl overflow-hidden transition-transform duration-300 hover:scale-[1.015] ${theme.shadow} ${theme.border}`}
+              style={{
+                background: cardBg,
+                color: cardText,
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                height: '100%',
+                borderRadius: '20px',
+                boxShadow:
+                  themeName === 'dark'
+                    ? '0px 4px 24px rgba(0,0,0,0.5)'
+                    : '0px 4px 20px rgba(0,0,0,0.1)'
+              }}
+            >
               <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <School color="primary" />
-                  <Typography variant="h6" ml={1}>
-                    {assignment.code}
-                  </Typography>
-                  <Chip 
+                {/* Header Row: Code & Credits */}
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  flexWrap="wrap"
+                  gap={1}
+                  mb={1}
+                >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <School fontSize="small" color="primary" />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: cardText,
+                        wordBreak: 'break-word'
+                      }}
+                    >
+                      {assignment.code}
+                    </Typography>
+                  </Box>
+                  <Chip
                     label={`${assignment.credits} credits`}
                     size="small"
-                    color="primary"
-                    sx={{ ml: 'auto' }}
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 13,
+                      background: chipBg,
+                      color: chipText,
+                      height: 24
+                    }}
                   />
                 </Box>
 
-                <Typography variant="subtitle1" gutterBottom>
+                {/* Title */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 500,
+                    mb: 2,
+                    color: cardText,
+                    wordBreak: 'break-word'
+                  }}
+                >
                   {assignment.title}
                 </Typography>
 
-                <Box display="flex" alignItems="center" mt={2}>
+                {/* Faculty Info */}
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
                   <Avatar
                     src={assignment.faculty.photoUrl}
                     alt={assignment.faculty.name}
-                    sx={{ width: 32, height: 32 }}
+                    sx={{ width: 40, height: 40 }}
                   >
                     <Person />
                   </Avatar>
-                  <Box ml={1}>
-                    <Typography variant="body2">
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: cardText }}>
                       {assignment.faculty.name}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary">
+                    <Typography
+                      variant="caption"
+                      sx={{ color: themeName === 'dark' ? '#a3aed6' : '#64748b' }}
+                    >
                       {assignment.faculty.email}
                     </Typography>
                   </Box>
                 </Box>
 
-                <Box display="flex" alignItems="center" mt={1}>
+                {/* Date Assigned */}
+                <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <Timer fontSize="small" color="action" />
-                  <Typography variant="caption" color="textSecondary" ml={1}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: themeName === 'dark' ? '#a3aed6' : '#64748b' }}
+                  >
                     Assigned: {new Date(assignment.assignedAt).toLocaleDateString()}
                   </Typography>
                 </Box>
 
-                <Box mt={2}>
+                {/* Button */}
+                <Box mt="auto">
                   <Button
                     variant="contained"
                     color="primary"
                     startIcon={<Visibility />}
                     fullWidth
                     onClick={() => handleViewCourse(assignment)}
+                    sx={{ borderRadius: 2, fontWeight: 600, py: 1.2 }}
                   >
                     View Course
                   </Button>
@@ -145,4 +208,4 @@ const SemesterCourses = () => {
   );
 };
 
-export default SemesterCourses; 
+export default SemesterCourses;
