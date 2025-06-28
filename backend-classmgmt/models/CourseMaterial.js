@@ -63,29 +63,6 @@ const deadlineSchema = new mongoose.Schema({
     }
 });
 
-// Syllabus Schema
-const syllabusSchema = new mongoose.Schema({
-    ...materialBaseSchema,
-    fileUrl: {
-        type: String,
-        required: true
-    },
-    fileType: {
-        type: String,
-        required: true
-    },
-    units: [{
-        title: String,
-        topics: [String],
-        duration: Number // in hours
-    }],
-    totalHours: Number,
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-});
-
 // Course Material Schema (for lecture notes, presentations, etc.)
 const courseMaterialSchema = new mongoose.Schema({
     ...materialBaseSchema,
@@ -160,14 +137,12 @@ const whiteboardShotSchema = new mongoose.Schema({
 
 // Create models
 const Deadline = mongoose.model('Deadline', deadlineSchema);
-const Syllabus = mongoose.model('Syllabus', syllabusSchema);
 const CourseMaterial = mongoose.model('CourseMaterial', courseMaterialSchema);
 const SharedNote = mongoose.model('SharedNote', sharedNoteSchema);
 const WhiteboardShot = mongoose.model('WhiteboardShot', whiteboardShotSchema);
 
 module.exports = {
     Deadline,
-    Syllabus,
     CourseMaterial,
     SharedNote,
     WhiteboardShot
