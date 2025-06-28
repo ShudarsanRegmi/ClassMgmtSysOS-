@@ -58,6 +58,7 @@ const StandaloneCourseView = () => {
   const [activeSection, setActiveSection] = useState('deadlines');
   const [courseData, setCourseData] = useState(null);
   const [materials, setMaterials] = useState(null);
+  const [syllabus, setSyllabus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -68,13 +69,15 @@ const StandaloneCourseView = () => {
       if (!courseId || !semesterId) return;
 
       try {
-        const [courseResponse, materialsResponse] = await Promise.all([
+        const [courseResponse, materialsResponse, syllabusResponse] = await Promise.all([
           api.get(`/courses/${courseId}/semester/${semesterId}`),
-          api.get(`/courses/${courseId}/materials/${semesterId}`)
+          api.get(`/courses/${courseId}/materials/${semesterId}`),
+          api.get(`/syllabus/${courseId}/${semesterId}`)
         ]);
 
         setCourseData(courseResponse.data.data);
         setMaterials(materialsResponse.data.data);
+        setSyllabus(syllabusResponse.data.data);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch course data');
@@ -131,13 +134,13 @@ const StandaloneCourseView = () => {
         />;
       case 'syllabus':
         return <SyllabusTab 
-          syllabus={materials?.syllabus}
+          syllabus={syllabus?.files || []}
           courseId={courseId}
           semesterId={semesterId}
-          onSyllabusUpdate={(updatedSyllabus) => {
-            setMaterials(prev => ({
+          onSyllabusUpdate={(updatedFiles) => {
+            setSyllabus(prev => ({
               ...prev,
-              syllabus: updatedSyllabus
+              files: updatedFiles
             }));
           }}
         />;

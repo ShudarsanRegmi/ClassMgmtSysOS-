@@ -181,71 +181,79 @@ const HonorList = ({ honors, isCR, onUpdate, onDelete }) => {
   };
 
   return (
-    <>
-      <Paper 
-        elevation={4}
+  <>
+    <Paper
+      elevation={0}
+      sx={{
+        p: 4,
+        mb: 5,
+        borderRadius: 4,
+        backgroundColor: '#1E293B', // background.medium
+        border: '1px solid #334155', // border.soft
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <Typography 
+        variant="h4" 
+        align="center" 
+        gutterBottom 
         sx={{ 
-          p: 4, 
-          mb: 5,
-          borderRadius: 4,
-          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: 'white',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+          fontWeight: 600,
+          color: '#F1F5F9', // text.base
+          mb: 4
         }}
       >
-        <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 600 }}>
-          🏆 Semester Rank Holders
-        </Typography>
-        
-        <Grid container spacing={4} sx={{ mt: 3, justifyContent: 'center' }}>
-          {[1, 2, 3].map((rank) => (
-            <Grid item xs={12} md={4} key={rank} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{ mb: 3, width: '100%', maxWidth: 320 }}>
-                {honorsByRank[rank]?.map((honor) => (
-                  <Box key={honor._id} sx={{ mb: 3 }}>
-                    <RankCard 
-                      student={honor.student} 
-                      rank={rank} 
-                      photoUrl={honor.photoUrl}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      isCR={isCR}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+        🏆 Honor Board — Semester Rank Holders
+      </Typography>
 
-      <Dialog open={editDialog} onClose={() => setEditDialog(false)}>
-        <DialogTitle>Edit Rank</DialogTitle>
-        <DialogContent>
-          <TextField
-            select
-            fullWidth
-            label="New Rank"
-            value={editedRank}
-            onChange={(e) => setEditedRank(e.target.value)}
-            sx={{ mt: 2 }}
-          >
-            {[1, 2, 3].map((rank) => (
-              <MenuItem key={rank} value={rank}>
-                {rank === 1 ? '🥇 1st' : rank === 2 ? '🥈 2nd' : '🥉 3rd'}
-              </MenuItem>
+      <Grid container spacing={4} justifyContent="center">
+        {[1, 2, 3].map((rank) => (
+          <Grid item xs={12} sm={6} md={4} key={rank}>
+            {honorsByRank[rank]?.map((honor) => (
+              <RankCard
+                key={honor._id}
+                student={honor.student}
+                rank={rank}
+                photoUrl={honor.photoUrl}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isCR={isCR}
+              />
             ))}
-          </TextField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditDialog(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
+          </Grid>
+        ))}
+      </Grid>
+    </Paper>
+
+    <Dialog open={editDialog} onClose={() => setEditDialog(false)}>
+      <DialogTitle>Edit Rank</DialogTitle>
+      <DialogContent>
+        <TextField
+          select
+          fullWidth
+          label="New Rank"
+          value={editedRank}
+          onChange={(e) => setEditedRank(e.target.value)}
+          sx={{ mt: 2 }}
+        >
+          {[1, 2, 3].map((rank) => (
+            <MenuItem key={rank} value={rank}>
+              {rank === 1 ? '🥇 1st' : rank === 2 ? '🥈 2nd' : '🥉 3rd'}
+            </MenuItem>
+          ))}
+        </TextField>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setEditDialog(false)}>Cancel</Button>
+        <Button onClick={handleSave} variant="contained" sx={{ backgroundColor: '#3B82F6', color: 'white' }}>
+          Save Changes
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </>
+);
+
+    
 };
 
 export default HonorList;
