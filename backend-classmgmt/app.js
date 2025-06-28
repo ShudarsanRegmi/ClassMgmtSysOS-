@@ -13,6 +13,7 @@ const settingsRoutes = require('./routes/systemSettingsRoutes');
 const assignmentRoutes = require('./routes/courseAssignmentRoutes');
 const noticeRoutes = require('./routes/noticeRoutes');
 const courseMaterialRoutes = require('./routes/courseMaterialRoutes');
+const syllabusRoutes = require('./routes/syllabusRoutes');
 const connectDB = require('./config/db');
 const eventRoutes = require('./routes/event.routes');
 const path = require('path');
@@ -55,6 +56,7 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/sem', semesterRoutes);
 app.use('/api/notices', noticeRoutes);  
 app.use('/api/materials', courseMaterialRoutes); // courseRoute was used instead of this..
+app.use('/api/syllabus', syllabusRoutes);
 
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/assignments/', assignmentRoutes);
