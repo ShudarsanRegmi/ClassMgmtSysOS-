@@ -132,13 +132,13 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
         : [];
       
       formDataToSend.append('tags', JSON.stringify(tagsArray));
-      formDataToSend.append('uploadedBy', formData.sharedBy || userId);
+      formDataToSend.append('sharedBy', formData.sharedBy || userId);
 
       console.log('Submitting note with formData:', {
         title: formData.title,
         description: formData.description,
         tags: tagsArray,
-        uploadedBy: formData.sharedBy || userId
+        sharedBy: formData.sharedBy || userId
       });
 
       const response = await api.post(
@@ -154,9 +154,9 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
       console.log('Note upload API Response:', response.data);
 
       if (onNoteUpdate) {
-        // Find the student details for uploadedBy
-        const uploadedByStudent = students.find(s => s._id === (response.data.data.uploadedBy?._id || response.data.data.uploadedBy));
-        console.log('Found uploadedBy student:', uploadedByStudent);
+        // Find the student details for sharedBy
+        const sharedByStudent = students.find(s => s._id === (response.data.data.sharedBy?._id || response.data.data.sharedBy));
+        console.log('Found sharedBy student:', sharedByStudent);
         
         // Ensure the response data has the correct format before updating
         const newNote = {
@@ -164,7 +164,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
           tags: Array.isArray(response.data.data.tags) 
             ? response.data.data.tags 
             : response.data.data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
-          uploadedBy: uploadedByStudent || response.data.data.uploadedBy,
+          sharedBy: sharedByStudent || response.data.data.sharedBy,
           uploadedAt: response.data.data.uploadedAt || new Date().toISOString()
         };
         console.log('Processed new note:', newNote);
@@ -191,7 +191,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
 
   const handleLike = async (noteId) => {
     try {
-      const response = await api.post(`/courses/${courseId}/materials/${semesterId}/notes/${noteId}/like`);
+      const response = await api.post(`/courses/${courseId}/materials/${semesterId}/note/${noteId}/like`);
       console.log('Like response:', response.data);
 
       const updatedNotes = notes.map(note => {
@@ -290,13 +290,13 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                 <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                   <Box display="flex" alignItems="center">
                     <Avatar
-                      src={note.uploadedBy?.photoUrl}
-                      alt={note.uploadedBy?.name || 'User'}
+                      src={note.sharedBy?.photoUrl || note.uploadedBy?.photoUrl}
+                      alt={note.sharedBy?.name || note.uploadedBy?.name || 'User'}
                       sx={{ width: 24, height: 24, mr: 1 }}
                     />
                     <Box>
                       <Typography variant="body2" color="textSecondary">
-                        Shared by {note.uploadedBy?._id === userId ? 'You' : note.uploadedBy?.name || 'Unknown User'}
+                        Shared by {note.sharedBy?._id === userId ? 'You' : note.sharedBy?.name || note.uploadedBy?.name || 'Unknown User'}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
                         {new Date(note.uploadedAt).toLocaleDateString('en-US', {
@@ -328,7 +328,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                     >
                       <Download />
                     </IconButton>
-                    {(userRole === 'FACULTY' || userRole === 'CA' || note.uploadedBy?._id === userId) && (
+                    {(userRole === 'FACULTY' || userRole === 'CA' || note.sharedBy?._id === userId || note.uploadedBy?._id === userId) && (
                       <IconButton
                         size="small"
                         color="error"
