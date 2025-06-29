@@ -51,6 +51,6 @@ router.put('/:courseId/materials/:semesterId/:type/:id', verifyToken, upload.sin
 router.delete('/:courseId/materials/:semesterId/:type/:id', verifyToken, deleteMaterial);
 
 // Like/Unlike shared note
-router.post('/:courseId/materials/:semesterId/notes/:id/like', verifyToken, toggleNoteLike);
+router.post('/:courseId/materials/:semesterId/note/:id/like', verifyToken, toggleNoteLike);
 
 module.exports = router;

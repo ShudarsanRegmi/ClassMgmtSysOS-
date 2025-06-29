@@ -75,6 +75,7 @@ const getCourseMaterials = async (req, res) => {
             case 'notes':
                 materials = await SharedNote.find(query)
                     .populate('uploadedBy', 'name email photoUrl')
+                    .populate('sharedBy', 'name email photoUrl')
                     .populate('likes', 'name')
                     .sort({ uploadedAt: -1 });
                 break;
@@ -88,7 +89,7 @@ const getCourseMaterials = async (req, res) => {
                 const [deadlines, courseMaterials, notes, whiteboardShots] = await Promise.all([
                     Deadline.find(query).populate('uploadedBy', 'name email photoUrl'),
                     CourseMaterial.find(query).populate('uploadedBy', 'name email photoUrl'),
-                    SharedNote.find(query).populate('uploadedBy', 'name email photoUrl').populate('likes', 'name'),
+                    SharedNote.find(query).populate('uploadedBy', 'name email photoUrl').populate('sharedBy', 'name email photoUrl').populate('likes', 'name'),
                     WhiteboardShot.find(query).populate('uploadedBy', 'name email photoUrl')
                 ]);
 
@@ -136,6 +137,11 @@ const uploadMaterial = async (req, res) => {
             classId: classDetails._id,
         };
 
+        // Handle sharedBy field for shared notes
+        if (type === 'note' && req.body.sharedBy) {
+            materialData.sharedBy = req.body.sharedBy;
+        }
+
         let material;
         
         if (type === 'whiteboard') {
@@ -180,6 +186,13 @@ const uploadMaterial = async (req, res) => {
                     material = new CourseMaterial(materialData);
                     break;
                 case 'note':
+                    // For shared notes, ensure sharedBy is set
+                    if (!materialData.sharedBy) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'sharedBy field is required for shared notes'
+                        });
+                    }
                     material = new SharedNote(materialData);
                     break;
                 default:
@@ -192,8 +205,13 @@ const uploadMaterial = async (req, res) => {
 
         await material.save();
         
-        // Populate uploadedBy field
-        await material.populate('uploadedBy', 'name email photoUrl');
+        // Populate uploadedBy and sharedBy fields for shared notes
+        if (type === 'note') {
+            await material.populate('uploadedBy', 'name email photoUrl');
+            await material.populate('sharedBy', 'name email photoUrl');
+        } else {
+            await material.populate('uploadedBy', 'name email photoUrl');
+        }
 
         res.status(201).json({
             success: true,
@@ -257,6 +275,11 @@ const updateMaterial = async (req, res) => {
                 success: false,
                 message: 'Material not found'
             });
+        }
+
+        // Populate sharedBy field for shared notes
+        if (type === 'note') {
+            await material.populate('sharedBy', 'name email photoUrl');
         }
 
         res.status(200).json({
@@ -345,6 +368,7 @@ const toggleNoteLike = async (req, res) => {
 
         await note.save();
         await note.populate('uploadedBy', 'name email photoUrl');
+        await note.populate('sharedBy', 'name email photoUrl');
         await note.populate('likes', 'name');
 
         res.status(200).json({
@@ -359,29 +383,33 @@ const toggleNoteLike = async (req, res) => {
 
 const getClassStudents = async (req, res) => {
     try {
-        const { courseId, semesterId } = req.params;
+        const { courseId } = req.params;
+        const { user } = req;
 
-        // Find the class
-        const classData = await Class.findOne({ courseId, semesterId });
-        if (!classData) {
-            return res.status(404).json({
-                success: false,
-                message: 'Class not found'
-            });
+        // Get user's class
+        const userDetails = await User.findOne({ uid: user.uid });
+        if (!userDetails) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get class details using classId string
+        const classDetails = await Class.findOne({ classId: userDetails.classId });
+        if (!classDetails) {
+            return res.status(404).json({ message: "Class not found" });
         }
 
         // Get all students in the class
         const students = await User.find(
             { 
-                _id: { $in: classData.students },
+                classId: userDetails.classId,
                 userRole: 'STUDENT'
             },
-            'name email photoUrl'
+            'name email photoUrl rollNo'
         );
 
         res.status(200).json({
             success: true,
-            data: students
+            students: students
         });
     } catch (error) {
         handleError(res, error);
