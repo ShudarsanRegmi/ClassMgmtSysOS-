@@ -142,6 +142,21 @@ const uploadMaterial = async (req, res) => {
             materialData.sharedBy = req.body.sharedBy;
         }
 
+        // Handle tags parsing for shared notes
+        if (type === 'note' && req.body.tags) {
+            try {
+                const parsedTags = JSON.parse(req.body.tags);
+                if (Array.isArray(parsedTags)) {
+                    materialData.tags = parsedTags;
+                } else {
+                    materialData.tags = [req.body.tags];
+                }
+            } catch (error) {
+                // If JSON parsing fails, treat as single tag
+                materialData.tags = [req.body.tags];
+            }
+        }
+
         let material;
         
         if (type === 'whiteboard') {
@@ -238,6 +253,21 @@ const updateMaterial = async (req, res) => {
                 fileUrl,
                 fileType: req.file.mimetype
             };
+        }
+
+        // Handle tags parsing for shared notes updates
+        if (type === 'note' && req.body.tags) {
+            try {
+                const parsedTags = JSON.parse(req.body.tags);
+                if (Array.isArray(parsedTags)) {
+                    updateData.tags = parsedTags;
+                } else {
+                    updateData.tags = [req.body.tags];
+                }
+            } catch (error) {
+                // If JSON parsing fails, treat as single tag
+                updateData.tags = [req.body.tags];
+            }
         }
 
         let Model;
