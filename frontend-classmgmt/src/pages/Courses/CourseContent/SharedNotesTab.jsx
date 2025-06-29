@@ -45,6 +45,34 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Helper function to parse tags from various formats
+  const parseTags = (tags) => {
+    let tagsArray = [];
+    
+    if (Array.isArray(tags)) {
+      // Handle array format
+      tagsArray = tags.map(tag => 
+        typeof tag === 'string' ? tag.trim() : String(tag)
+      );
+    } else if (typeof tags === 'string') {
+      try {
+        // Try to parse as JSON first (for cases like ["new","two"])
+        const parsed = JSON.parse(tags);
+        if (Array.isArray(parsed)) {
+          tagsArray = parsed.map(tag => String(tag).trim());
+        } else {
+          // If not an array, treat as comma-separated string
+          tagsArray = tags.split(',').map(tag => tag.trim());
+        }
+      } catch (error) {
+        // If JSON parsing fails, treat as comma-separated string
+        tagsArray = tags.split(',').map(tag => tag.trim());
+      }
+    }
+    
+    return tagsArray.filter(Boolean);
+  };
+
   // Log notes prop whenever it changes
   useEffect(() => {
     console.log('Notes prop received:', notes);
@@ -124,12 +152,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
       formDataToSend.append('description', formData.description);
       
       // Process tags: split, trim, and filter empty tags
-      const tagsArray = formData.tags
-        ? formData.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(Boolean)
-        : [];
+      const tagsArray = parseTags(formData.tags);
       
       formDataToSend.append('tags', JSON.stringify(tagsArray));
       formDataToSend.append('sharedBy', formData.sharedBy || userId);
@@ -161,9 +184,32 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
         // Ensure the response data has the correct format before updating
         const newNote = {
           ...response.data.data,
-          tags: Array.isArray(response.data.data.tags) 
-            ? response.data.data.tags 
-            : response.data.data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
+          tags: (() => {
+            let tagsArray = [];
+            
+            if (Array.isArray(response.data.data.tags)) {
+              // Handle array format
+              tagsArray = response.data.data.tags.map(tag => 
+                typeof tag === 'string' ? tag.trim() : String(tag)
+              );
+            } else if (typeof response.data.data.tags === 'string') {
+              try {
+                // Try to parse as JSON first (for cases like ["new","two"])
+                const parsed = JSON.parse(response.data.data.tags);
+                if (Array.isArray(parsed)) {
+                  tagsArray = parsed.map(tag => String(tag).trim());
+                } else {
+                  // If not an array, treat as comma-separated string
+                  tagsArray = response.data.data.tags.split(',').map(tag => tag.trim());
+                }
+              } catch (error) {
+                // If JSON parsing fails, treat as comma-separated string
+                tagsArray = response.data.data.tags.split(',').map(tag => tag.trim());
+              }
+            }
+            
+            return tagsArray.filter(Boolean);
+          })(),
           sharedBy: sharedByStudent || response.data.data.sharedBy,
           uploadedAt: response.data.data.uploadedAt || new Date().toISOString()
         };
@@ -264,15 +310,28 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                   <Box>
                     {(() => {
                       let tagsArray = [];
+                      
                       if (Array.isArray(note.tags)) {
-                        // Handle array format (possibly stringified)
+                        // Handle array format
                         tagsArray = note.tags.map(tag => 
-                          typeof tag === 'string' ? tag.replace(/[\[\]"]/g, '').trim() : tag
+                          typeof tag === 'string' ? tag.trim() : String(tag)
                         );
                       } else if (typeof note.tags === 'string') {
-                        // Handle comma-separated string
-                        tagsArray = note.tags.split(',').map(tag => tag.trim());
+                        try {
+                          // Try to parse as JSON first (for cases like ["new","two"])
+                          const parsed = JSON.parse(note.tags);
+                          if (Array.isArray(parsed)) {
+                            tagsArray = parsed.map(tag => String(tag).trim());
+                          } else {
+                            // If not an array, treat as comma-separated string
+                            tagsArray = note.tags.split(',').map(tag => tag.trim());
+                          }
+                        } catch (error) {
+                          // If JSON parsing fails, treat as comma-separated string
+                          tagsArray = note.tags.split(',').map(tag => tag.trim());
+                        }
                       }
+                      
                       return tagsArray.filter(Boolean).map((tag, index) => (
                         <Chip
                           key={index}
