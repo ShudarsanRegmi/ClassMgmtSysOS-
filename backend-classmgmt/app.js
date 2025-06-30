@@ -20,6 +20,7 @@ const path = require('path');
 const timetableRoutes = require('./routes/timetable');
 const honorRoutes = require('./routes/honor.routes');
 const pyqRoutes = require('./routes/pyq.routes');
+const sharedLinkRoutes = require('./routes/sharedLinkRoutes');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swaggerOptions");
@@ -65,6 +66,8 @@ app.use('/api/events', eventRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/honors', honorRoutes);
 app.use('/api/pyqs', pyqRoutes);
+app.use('/api/sharedlinks', sharedLinkRoutes);
+
 // Set up the default route or any other necessary routes
 app.get("/", (req, res) => {
     res.send("Welcome to the API!");

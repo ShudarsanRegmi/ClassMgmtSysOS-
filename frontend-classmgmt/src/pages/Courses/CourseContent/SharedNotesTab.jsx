@@ -45,6 +45,34 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Helper function to parse tags from various formats
+  const parseTags = (tags) => {
+    let tagsArray = [];
+    
+    if (Array.isArray(tags)) {
+      // Handle array format
+      tagsArray = tags.map(tag => 
+        typeof tag === 'string' ? tag.trim() : String(tag)
+      );
+    } else if (typeof tags === 'string') {
+      try {
+        // Try to parse as JSON first (for cases like ["new","two"])
+        const parsed = JSON.parse(tags);
+        if (Array.isArray(parsed)) {
+          tagsArray = parsed.map(tag => String(tag).trim());
+        } else {
+          // If not an array, treat as comma-separated string
+          tagsArray = tags.split(',').map(tag => tag.trim());
+        }
+      } catch (error) {
+        // If JSON parsing fails, treat as comma-separated string
+        tagsArray = tags.split(',').map(tag => tag.trim());
+      }
+    }
+    
+    return tagsArray.filter(Boolean);
+  };
+
   // Log notes prop whenever it changes
   useEffect(() => {
     console.log('Notes prop received:', notes);
@@ -124,21 +152,16 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
       formDataToSend.append('description', formData.description);
       
       // Process tags: split, trim, and filter empty tags
-      const tagsArray = formData.tags
-        ? formData.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(Boolean)
-        : [];
+      const tagsArray = parseTags(formData.tags);
       
       formDataToSend.append('tags', JSON.stringify(tagsArray));
-      formDataToSend.append('uploadedBy', formData.sharedBy || userId);
+      formDataToSend.append('sharedBy', formData.sharedBy || userId);
 
       console.log('Submitting note with formData:', {
         title: formData.title,
         description: formData.description,
         tags: tagsArray,
-        uploadedBy: formData.sharedBy || userId
+        sharedBy: formData.sharedBy || userId
       });
 
       const response = await api.post(
@@ -154,17 +177,40 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
       console.log('Note upload API Response:', response.data);
 
       if (onNoteUpdate) {
-        // Find the student details for uploadedBy
-        const uploadedByStudent = students.find(s => s._id === (response.data.data.uploadedBy?._id || response.data.data.uploadedBy));
-        console.log('Found uploadedBy student:', uploadedByStudent);
+        // Find the student details for sharedBy
+        const sharedByStudent = students.find(s => s._id === (response.data.data.sharedBy?._id || response.data.data.sharedBy));
+        console.log('Found sharedBy student:', sharedByStudent);
         
         // Ensure the response data has the correct format before updating
         const newNote = {
           ...response.data.data,
-          tags: Array.isArray(response.data.data.tags) 
-            ? response.data.data.tags 
-            : response.data.data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
-          uploadedBy: uploadedByStudent || response.data.data.uploadedBy,
+          tags: (() => {
+            let tagsArray = [];
+            
+            if (Array.isArray(response.data.data.tags)) {
+              // Handle array format
+              tagsArray = response.data.data.tags.map(tag => 
+                typeof tag === 'string' ? tag.trim() : String(tag)
+              );
+            } else if (typeof response.data.data.tags === 'string') {
+              try {
+                // Try to parse as JSON first (for cases like ["new","two"])
+                const parsed = JSON.parse(response.data.data.tags);
+                if (Array.isArray(parsed)) {
+                  tagsArray = parsed.map(tag => String(tag).trim());
+                } else {
+                  // If not an array, treat as comma-separated string
+                  tagsArray = response.data.data.tags.split(',').map(tag => tag.trim());
+                }
+              } catch (error) {
+                // If JSON parsing fails, treat as comma-separated string
+                tagsArray = response.data.data.tags.split(',').map(tag => tag.trim());
+              }
+            }
+            
+            return tagsArray.filter(Boolean);
+          })(),
+          sharedBy: sharedByStudent || response.data.data.sharedBy,
           uploadedAt: response.data.data.uploadedAt || new Date().toISOString()
         };
         console.log('Processed new note:', newNote);
@@ -191,7 +237,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
 
   const handleLike = async (noteId) => {
     try {
-      const response = await api.post(`/courses/${courseId}/materials/${semesterId}/notes/${noteId}/like`);
+      const response = await api.post(`/courses/${courseId}/materials/${semesterId}/note/${noteId}/like`);
       console.log('Like response:', response.data);
 
       const updatedNotes = notes.map(note => {
@@ -264,15 +310,28 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                   <Box>
                     {(() => {
                       let tagsArray = [];
+                      
                       if (Array.isArray(note.tags)) {
-                        // Handle array format (possibly stringified)
+                        // Handle array format
                         tagsArray = note.tags.map(tag => 
-                          typeof tag === 'string' ? tag.replace(/[\[\]"]/g, '').trim() : tag
+                          typeof tag === 'string' ? tag.trim() : String(tag)
                         );
                       } else if (typeof note.tags === 'string') {
-                        // Handle comma-separated string
-                        tagsArray = note.tags.split(',').map(tag => tag.trim());
+                        try {
+                          // Try to parse as JSON first (for cases like ["new","two"])
+                          const parsed = JSON.parse(note.tags);
+                          if (Array.isArray(parsed)) {
+                            tagsArray = parsed.map(tag => String(tag).trim());
+                          } else {
+                            // If not an array, treat as comma-separated string
+                            tagsArray = note.tags.split(',').map(tag => tag.trim());
+                          }
+                        } catch (error) {
+                          // If JSON parsing fails, treat as comma-separated string
+                          tagsArray = note.tags.split(',').map(tag => tag.trim());
+                        }
                       }
+                      
                       return tagsArray.filter(Boolean).map((tag, index) => (
                         <Chip
                           key={index}
@@ -290,13 +349,13 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                 <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
                   <Box display="flex" alignItems="center">
                     <Avatar
-                      src={note.uploadedBy?.photoUrl}
-                      alt={note.uploadedBy?.name || 'User'}
+                      src={note.sharedBy?.photoUrl || note.uploadedBy?.photoUrl}
+                      alt={note.sharedBy?.name || note.uploadedBy?.name || 'User'}
                       sx={{ width: 24, height: 24, mr: 1 }}
                     />
                     <Box>
                       <Typography variant="body2" color="textSecondary">
-                        Shared by {note.uploadedBy?._id === userId ? 'You' : note.uploadedBy?.name || 'Unknown User'}
+                        Shared by {note.sharedBy?._id === userId ? 'You' : note.sharedBy?.name || note.uploadedBy?.name || 'Unknown User'}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
                         {new Date(note.uploadedAt).toLocaleDateString('en-US', {
@@ -328,7 +387,7 @@ const SharedNotesTab = ({ notes = [], courseId, semesterId, onNoteUpdate }) => {
                     >
                       <Download />
                     </IconButton>
-                    {(userRole === 'FACULTY' || userRole === 'CA' || note.uploadedBy?._id === userId) && (
+                    {(userRole === 'FACULTY' || userRole === 'CA' || note.sharedBy?._id === userId || note.uploadedBy?._id === userId) && (
                       <IconButton
                         size="small"
                         color="error"
