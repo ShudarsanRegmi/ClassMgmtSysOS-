@@ -35,7 +35,8 @@ import {
   Person,
   CalendarToday,
   School,
-  History
+  History,
+  Link
 } from '@mui/icons-material';
 
 // Import the individual content components
@@ -45,7 +46,7 @@ import MaterialsTab from './CourseContent/MaterialsTab';
 import SharedNotesTab from './CourseContent/SharedNotesTab';
 import WhiteboardTab from './CourseContent/WhiteboardTab';
 import PYQsTab from './CourseContent/PYQsTab';
-
+import SharedLinks from './CourseContent/SharedLinks'
 // Component to display the course specific content
 const StandaloneCourseView = () => {
   const { courseId, semesterId } = useParams();
@@ -96,6 +97,7 @@ const StandaloneCourseView = () => {
     { id: 'notes', label: 'Shared Notes', icon: <Note /> },
     { id: 'whiteboard', label: 'Whiteboard Shots', icon: <PhotoLibrary /> },
     { id: 'pyqs', label: 'PYQs', icon: <History /> },
+    { id: 'sharedlinks', label: 'Shared Links', icon: <Link /> },
   ];
 
   const handleDrawerToggle = () => {
@@ -182,6 +184,8 @@ const StandaloneCourseView = () => {
         />;
       case 'pyqs':
         return <PYQsTab courseId={courseId} semesterId={semesterId} />;
+      case 'sharedlinks':
+        return <SharedLinks courseId={courseId} semesterId={semesterId} />;
       default:
         return null;
     }
