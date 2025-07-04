@@ -156,13 +156,26 @@ CLOUD_API_KEY=cloud_api_key
 CLOUD_API_SECRET=cloud_secret
 ```
 
-**Frontend .env**
+**Firebase ServiceAccountKey.md**
+
+Create `serviceAccountKey.json` at the root of `backend-classmgmt`
+
 ```
-PORT=3001
-MONGO_URI=mongodburl
-CLOUD_NAME=cloudname
-CLOUD_API_KEY=cloud_api_key
-CLOUD_API_SECRET=cloud_secret
+{
+    "type": "service_account",
+    "project_id": "classmgmt-xxxx",
+    "private_key_id": "6284ed185a40xxxxxxxxe82b0d381207686012",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIx0jYRJAxxxxxxxxCSjhYS9BS+N/d5C1qC\nGplfQMlp1iZt/zXmXyM0Ir/8ERq97AIorU2T5lYIZs7tnhKvpQDwK8NDARrHPkfz\nCrg88exLqgwKgJCewYMMTBfwVsOUPJYfPodAlMmqB/tiTfB/lv/2/BhSv/BBdofi\n0FP3uKSQFFjcGak75Hk/JQ==\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-axxxxx-fbsvc@cxxxx7d.iam.gserviceaccount.com",
+    "client_id": "xxxxxxxx",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40classmgmt-aa87d.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
+  
+
 ```
 
 **Frontend .env**
