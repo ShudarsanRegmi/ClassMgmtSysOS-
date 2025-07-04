@@ -8,7 +8,7 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 
 ---
 
-## 🚀 Features
+## 🚀 Features (Ongoing)
 
 | Feature                     | Description                                         |
 | --------------------------- | --------------------------------------------------- |
@@ -38,6 +38,8 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 | **Admin**       | Manage multiple classes and administrators.                       |
 | **Super Admin** | Full access across the system.                                    |
 
+**Further roles can be crated further or removed  as we identify the requirements during the development process**
+
 ---
 
 ## 🛠 Tech Stack
@@ -46,20 +48,20 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 
 * **Node.js** + **Express.js**: RESTful API development
 * **MongoDB**: NoSQL document-based data storage
-* **JWT**: Role-based authentication and route protection
+* **Firebase Auth** : For user authentication
 
 ### Frontend
 
-* **React.js**: Component-based UI
+* **React.js**: Component-based UI, Material UI
 * **HTML5/CSS3/JavaScript**
 * **Axios**: API requests handling
 
 ### Other Tools
 
-* **Cloud Storage**: AWS S3 / Google Cloud for media & file uploads
-* **PWA Support**: For offline capabilities and installable experience
+* **Cloud Storage**: Cloudinary
+* **PWA Support**: For offline capabilities and installable experience (planned)
 * **Docker** (Planned): Containerized deployment for all services
-* **Microservices Architecture** (Planned): Modular services for scalability
+* **Microservices Architecture** (Planned): Modular services for scalability (planned)
 
 ---
 
@@ -75,16 +77,15 @@ This project is PWA-enabled, ensuring:
 
 ## 🔌 API Development
 
-The backend APIs are developed using Express.js and follow a RESTful pattern. Authenticated routes are protected via JWT, with role-based access control (RBAC) ensuring secure endpoint access.
+The backend APIs are developed using Express.js and follow a RESTful pattern. Authenticated routes are protected via firebase auth, with role-based access control (RBAC) ensuring secure endpoint access.
 
-> Future: Python’s FastAPI may be introduced for AI-powered features like attendance analytics or feedback insights.
 
 ---
 
 ## 📂 File Management
 
-* Cloud-based file storage using **AWS S3** or **Google Cloud Storage**
-* CDN integration for faster content delivery
+* Firebase auth
+* CDN integration for faster content delivery (planned)
 * Secure, private access for authorized users only
 
 ---
@@ -120,37 +121,62 @@ An agent-based system will be integrated to:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/class-management-system.git
-   cd class-management-system
+   https://github.com/ShudarsanRegmi/ClassMgmtSysOS-.git
+   cd ClassMgmtSysOS-
    ```
 
 2. **Install backend dependencies**
 
    ```bash
-   cd backend
+   cd backend-classmgmt
    npm install
    ```
 
 3. **Install frontend dependencies**
 
    ```bash
-   cd ../frontend
+   cd frontend-classmgmt
    npm install
    ```
 
 4. **Environment setup**
-   Create a `.env` file in both backend and frontend directories with necessary credentials (MongoDB URI, JWT secret, etc.).
+   Create a `.env` file in both backend and frontend directories with necessary credentials (MongoDB URI, firebase api keys, etc.).
+
+**Backend .env**
+```
+PORT=3001
+MONGO_URI=mongodburl
+CLOUD_NAME=cloudname
+CLOUD_API_KEY=cloud_api_key
+CLOUD_API_SECRET=cloud_secret
+```
+
+**Frontend .env**
+```
+PORT=3001
+MONGO_URI=mongodburl
+CLOUD_NAME=cloudname
+CLOUD_API_KEY=cloud_api_key
+CLOUD_API_SECRET=cloud_secret
+```
+
+**Frontend .env**
+
+```
+FIREBASE_API_KEY=firebase_api_key
+BASE_URL=localhost:5173
+VITE_APP_ENV=development
+```
 
 5. **Run the app**
 
    ```bash
-   # Backend
-   cd backend
-   npm start
+   cd frontend-classmgmt
+   npm run dev
 
    # Frontend
-   cd ../frontend
-   npm start
+   cd frontend-classmgmt
+   npm run dev
    ```
 
 ---
