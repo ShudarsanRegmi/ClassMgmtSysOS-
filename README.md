@@ -1,5 +1,10 @@
 # 📚 Class Management System
 
+![image](https://github.com/user-attachments/assets/a956b1fd-943d-4a4d-aac2-1d6a5c002a95)
+![image](https://github.com/user-attachments/assets/1e490cd3-e330-49cd-9bb5-0db848f63861)
+![image](https://github.com/user-attachments/assets/5559f55f-ba3f-4936-8879-fc40fda36c4d)
+
+
 ## Overview
 
 The **Class Management System (CMS)** is a comprehensive web platform designed to streamline classroom operations and communication. It offers a multi-role environment for students, class representatives (CRs), class administrators (CAs), and system administrators to manage notices, attendance, materials, voting, and more.
