@@ -37,8 +37,10 @@ The following behaviors are strictly prohibited:
 
 If you experience or witness any behavior that violates this Code of Conduct, please report it promptly to the maintainers:
 
-**Maintainer:** [Shudarsan Regmi]`(https://www.linkedin.com/in/ShudarsanRegmi/)`
-🔒 Reports will be handled **confidentially** and reviewed seriously.
+🔗 **LinkedIn**: [Shudarsan Regmi](https://www.linkedin.com/in/ShudarsanRegmi/)  
+🔒 Reports will be handled **confidentially** and reviewed seriously by the project maintainers.
+
+---
 
 ### ⚖️ Enforcement Actions May Include:
 
