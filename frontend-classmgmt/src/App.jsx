@@ -25,6 +25,7 @@ import NoticeForm from './components/NoticeForm';
 import StandaloneCourseView from "./pages/Courses/StandaloneCourseView";
 import ClassPage from "./pages/Class/ClassPage";
 import Schedule from './components/Schedule';
+import Footer from './Footer';
 import { ThemeContext, themes } from './theme';
 
 import "./App.css";
@@ -173,6 +174,7 @@ function App() {
             </main>
           </div>
         </Router>
+        <Footer />
       </LocalizationProvider>
     </ThemeContext.Provider>
   );
