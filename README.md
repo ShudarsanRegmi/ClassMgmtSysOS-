@@ -13,6 +13,11 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 
 ---
 
+You can view the live deployed version of the Class Management System here:  
+🔗 [https://class-mgmt-sys-os-sri.vercel.app](https://class-mgmt-sys-os-sri.vercel.app)
+
+
+
 ## 🚀 Features (Ongoing)
 
 | Feature                     | Description                                         |
