@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import {useAuth} from '../context/AuthContext'
 
 const isDev = import.meta.env.VITE_APP_ENV === 'development';
 
@@ -45,42 +46,54 @@ const DevLinks = () => (
   </div>
 );
 
-const RealHome = () => (
-  <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
-    {/* Full-page cover image */}
-    <img
-      src="/cover1.jpg"
-      alt="Class Management Cover"
-      className="absolute inset-0 w-full h-full object-cover z-0"
-      style={{ minHeight: '100vh' }}
-    />
-    {/* Dark overlay for readability */}
-    <div className="absolute inset-0 bg-black/70 z-10" />
-    {/* Centered overlay content */}
-    <div className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
-      <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-white drop-shadow-lg mb-6">
-        Class Management <span className="block text-blue-200">Reimagined.</span>
-      </h1>
-      <p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 drop-shadow">
-        A futuristic way to manage your academic journey. Seamlessly handle classes, semesters, courses, files, and more—all in one intuitive platform.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link
-          to="/login"
-          className="px-8 py-3 bg-blue-400 text-white rounded-lg font-semibold text-lg hover:bg-cyan-600 transition shadow"
-        >
-          Login
-        </Link>
-        <Link
-          to="/register"
-          className="px-8 py-3 border border-cyan-400 text-blue-200 rounded-lg font-semibold text-lg hover:bg-cyan-600 hover:text-white transition shadow"
-        >
-          Register
-        </Link>
+const RealHome = () => {
+  const { isAuthenticated, userName } = useAuth();
+
+  return (
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+      {/* Full-page cover image */}
+      <img
+        src="/cover1.jpg"
+        alt="Class Management Cover"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ minHeight: '100vh' }}
+      />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/70 z-10" />
+      {/* Centered overlay content */}
+      <div className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
+        <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-white drop-shadow-lg mb-6">
+          Class Management <span className="block text-blue-200">Reimagined.</span>
+        </h1>
+        <p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 drop-shadow">
+          A futuristic way to manage your academic journey. Seamlessly handle classes, semesters, courses, files, and more—all in one intuitive platform.
+        </p>
+        {isAuthenticated ? (
+          <div className="mb-8">
+            <span className="text-2xl text-white font-semibold">
+              Welcome, {userName?.name || "User"}!
+            </span>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/login"
+              className="px-8 py-3 bg-blue-400 text-white rounded-lg font-semibold text-lg hover:bg-cyan-600 transition shadow"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="px-8 py-3 border border-cyan-400 text-blue-200 rounded-lg font-semibold text-lg hover:bg-cyan-600 hover:text-white transition shadow"
+            >
+              Register
+            </Link>
+          </div>
+        )}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Home = () => {
   return isDev ? <DevLinks /> : <RealHome />;
