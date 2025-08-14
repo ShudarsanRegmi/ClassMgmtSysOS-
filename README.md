@@ -68,6 +68,51 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 * **Docker** (Planned): Containerized deployment for all services
 * **Microservices Architecture** (Planned): Modular services for scalability (planned)
 
+
+---
+
+## 📁 Project Structure
+
+```bash
+ClassMgmtSysOS-/                       
+├── backend-classmgmt/
+│         ├── config/
+│         ├── controllers/
+│         ├── dtos/
+│         ├── middleware/
+│         ├── models/
+│         ├── routes/
+│         ├── services/
+│         ├── utils/
+│         ├── app.js
+│         ├── firebaseAdmin.js
+│         ├── nodemon.json
+│         ├── package-lock.json
+│         ├── package.json
+│         └── swaggerOptions.js       
+├── frontend-classmgmt/
+│         ├── cypress/
+│         ├── public/
+│         ├── src/
+│         ├── .gitignore
+│         ├── README.md
+│         ├── cypress.config.js
+│         ├── eslint.config.js
+│         ├── index.html
+│         ├──  muiTheme.js
+│         ├──  package-lock.json
+│         ├──  package.json
+│         ├── tailwind.config.js
+│         └── vite.config.js                                   
+├── CODE_OF_CONDUCT.md            
+├── CONTRIBUTING.md          
+├── LICENSE              
+├── SECURITY.md                                               
+└── README.md          
+          
+
+```
+
 ---
 
 ## 📱 Progressive Web App (PWA)
