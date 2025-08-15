@@ -1,0 +1,44 @@
+version: '3'
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend-classmgmt
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./backend-classmgmt/.env
+    depends_on:
+      - mongo
+    networks:
+      - mern-network
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend-classmgmt
+    ports:
+      - "3000:80"
+    env_file:
+      - ./frontend-classmgmt/.env
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mern-network
+
+networks:
+  mern-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
