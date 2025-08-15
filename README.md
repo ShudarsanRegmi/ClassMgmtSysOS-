@@ -65,7 +65,7 @@ Built with a powerful tech stack — **Node.js**, **Express.js**, **MongoDB**, a
 
 * **Cloud Storage**: Cloudinary
 * **PWA Support**: For offline capabilities and installable experience (planned)
-* **Docker** (Planned): Containerized deployment for all services
+* **Docker**: Containerized deployment for all services
 * **Microservices Architecture** (Planned): Modular services for scalability (planned)
 
 ---
@@ -150,7 +150,7 @@ An agent-based system will be integrated to:
 **Backend .env**
 ```
 PORT=3001
-MONGO_URI=mongodburl
+MONGO_URI=mongodburl | use this (mongodb://mongo:27017/) url for docker setup
 CLOUD_NAME=cloudname
 CLOUD_API_KEY=cloud_api_key
 CLOUD_API_SECRET=cloud_secret
@@ -196,7 +196,16 @@ VITE_APP_ENV=development
    cd frontend-classmgmt
    npm run dev
    ```
+6. **Run the app using docker engine**
+   - Install the docker desktop
+   - Open the docker desktop (so that docker engine will run)
+   - After setting up the env files of both (frontend and backen)
+   - Run the command below and see the containers in the docker containers section
+   - View localhost:3000 for frontend results
 
+   ```bash
+   docker compose up --build
+   ```
 ---
 
 ## 🧑‍💻 Contributing
