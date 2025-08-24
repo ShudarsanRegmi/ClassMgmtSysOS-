@@ -3,12 +3,14 @@ import { auth } from "../firebase";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaGithub, FaEnvelope, FaLock } from "react-icons/fa";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";5
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -74,20 +76,26 @@ const Login = () => {
           />
         </div>
 
-        <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-          <div className="bg-gray-100 p-3">
-            <FaLock className="text-gray-500" />
-          </div>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="flex-1 p-3 focus:outline-none"
-          />
-        </div>
-
+        <div className="flex items-center border border-gray-300 rounded-md overflow-hidden relative">
+                 <div className="bg-gray-100 p-3">
+                   <FaLock className="text-gray-500" />
+                 </div>
+                 <input
+                   type={showPassword ? "text" : "password"}
+                   placeholder="Password"
+                   value={password}
+                   onChange={(e) => setPassword(e.target.value)}
+                   required
+                   className="flex-1 p-3 focus:outline-none"
+                 />
+                 <button
+                   type="button"
+                   onClick={() => setShowPassword(!showPassword)}
+                   className="absolute right-3 text-gray-500 focus:outline-none"
+                 >
+                   {showPassword ? <FaEyeSlash /> : <FaEye />}
+                 </button>
+               </div>
         <button type="submit" className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer">
           Login
         </button>
